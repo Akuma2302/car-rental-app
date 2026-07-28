@@ -10,7 +10,7 @@ const env = {
   businessName: process.env.BUSINESS_NAME || 'JalanGo',
   openHour: parseInt(process.env.OPEN_HOUR || '7', 10),
   closeHour: parseInt(process.env.CLOSE_HOUR || '22', 10),
-  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  corsOrigin: process.env.CORS_ORIGIN || 'https://car-rental-app-orcin.vercel.app',
 };
 
 module.exports = env;
