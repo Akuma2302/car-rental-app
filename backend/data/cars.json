@@ -1,0 +1,29 @@
+[
+  {
+    "id": "myvi",
+    "name": "Perodua Myvi",
+    "tagline": "Compact & easy to park",
+    "seats": 5,
+    "transmission": "Automatic",
+    "pricePerDay": 120,
+    "accent": "amber"
+  },
+  {
+    "id": "city",
+    "name": "Honda City",
+    "tagline": "Comfortable city sedan",
+    "seats": 5,
+    "transmission": "Automatic",
+    "pricePerDay": 160,
+    "accent": "jade"
+  },
+  {
+    "id": "innova",
+    "name": "Toyota Innova",
+    "tagline": "Spacious for family trips",
+    "seats": 7,
+    "transmission": "Automatic",
+    "pricePerDay": 220,
+    "accent": "dusk"
+  }
+]

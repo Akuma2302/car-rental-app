@@ -1,0 +1,19 @@
+{
+  "name": "car-rental-backend",
+  "version": "1.0.0",
+  "description": "REST API for the car rental landing page: car listings, per-car time-slot availability, and WhatsApp-ready booking creation.",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
