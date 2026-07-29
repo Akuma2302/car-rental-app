@@ -11,7 +11,7 @@ const env = {
   openHour: parseInt(process.env.OPEN_HOUR || '7', 10),
   closeHour: parseInt(process.env.CLOSE_HOUR || '22', 10),
   corsOrigin: process.env.CORS_ORIGIN || 'https://car-rental-app-orcin.vercel.app',
-  adminCorsOrigin: process.env.ADMIN_CORS_ORIGIN || 'http://localhost:5174',
+  adminCorsOrigin: process.env.ADMIN_CORS_ORIGIN || 'https://car-rental-app-admin.vercel.app',
   databaseUrl: process.env.DATABASE_URL || '',
   jwtSecret: process.env.JWT_SECRET || '',
   // Bootstrap credentials — used once, to create the first admin account if
