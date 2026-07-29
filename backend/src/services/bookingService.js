@@ -1,8 +1,9 @@
 const env = require('../config/env');
 const carRepository = require('../repositories/carRepository');
 const bookingRepository = require('../repositories/bookingRepository');
-const { createBooking } = require('../models/Booking');
 const { buildWhatsappLink } = require('../utils/whatsapp');
+
+const POSTGRES_UNIQUE_VIOLATION = '23505';
 
 function buildDaySlots() {
   const slots = [];
@@ -17,9 +18,9 @@ const bookingService = {
    * @returns {{carId:string, date:string, openHour:number, closeHour:number,
    *            slots: {time:string, available:boolean}[]}}
    */
-  getAvailability(carId, date) {
+  async getAvailability(carId, date) {
     const allSlots = buildDaySlots();
-    const bookedForDay = bookingRepository.findByCarAndDate(carId, date);
+    const bookedForDay = await bookingRepository.findByCarAndDate(carId, date);
     const bookedTimes = new Set(bookedForDay.map((b) => b.time));
 
     return {
@@ -32,35 +33,33 @@ const bookingService = {
   },
 
   /**
-   * Validates the car exists and the slot is still free, persists the
-   * booking, then returns it alongside a ready-to-open WhatsApp link.
+   * Persists the booking and returns it alongside a ready-to-open WhatsApp
+   * link. Relies on the database's own UNIQUE(car_id, date, time)
+   * constraint to guarantee the slot really is free — this closes the race
+   * condition an application-level "check, then write" approach would have
+   * under concurrent requests.
    */
-  createBookingWithNotification({ carId, date, time, customerName, customerPhone }) {
-    const car = carRepository.findById(carId);
+  async createBookingWithNotification({ carId, date, time, customerName, customerPhone }) {
+    const car = await carRepository.findById(carId);
     if (!car) {
       const err = new Error('Car not found');
       err.status = 404;
       throw err;
     }
 
-    if (bookingRepository.isSlotTaken(carId, date, time)) {
-      const err = new Error(
-        'That time slot was just booked by someone else — please pick another.'
-      );
-      err.status = 409;
+    let booking;
+    try {
+      booking = await bookingRepository.create({ carId, date, time, customerName, customerPhone });
+    } catch (err) {
+      if (err.code === POSTGRES_UNIQUE_VIOLATION) {
+        const conflict = new Error(
+          'That time slot was just booked by someone else — please pick another.'
+        );
+        conflict.status = 409;
+        throw conflict;
+      }
       throw err;
     }
-
-    const booking = createBooking({
-      id: `${carId}-${date}-${time}-${Date.now()}`,
-      carId,
-      date,
-      time,
-      customerName,
-      customerPhone,
-    });
-
-    bookingRepository.create(booking);
 
     const whatsappUrl = buildWhatsappLink({ car, date, time, customerName, customerPhone });
 

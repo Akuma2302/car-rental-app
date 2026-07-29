@@ -10,7 +10,14 @@ const env = {
   businessName: process.env.BUSINESS_NAME || 'JalanGo',
   openHour: parseInt(process.env.OPEN_HOUR || '7', 10),
   closeHour: parseInt(process.env.CLOSE_HOUR || '22', 10),
-  corsOrigin: process.env.CORS_ORIGIN || 'https://car-rental-app-orcin.vercel.app',
+  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  adminCorsOrigin: process.env.ADMIN_CORS_ORIGIN || 'http://localhost:5174',
+  databaseUrl: process.env.DATABASE_URL || '',
+  jwtSecret: process.env.JWT_SECRET || '',
+  // Bootstrap credentials — used once, to create the first admin account if
+  // the admin_users table is empty. Change the password after first login.
+  adminUsername: process.env.ADMIN_USERNAME || 'admin',
+  adminPassword: process.env.ADMIN_PASSWORD || '',
 };
 
 module.exports = env;

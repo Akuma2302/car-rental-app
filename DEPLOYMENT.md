@@ -15,7 +15,12 @@ Two honest paths, depending on what you actually want:
 
 This is simplest, and it's what these tools are built for.
 
-**1. Put the project on GitHub** (Render/Netlify/Vercel all deploy by
+**1. Get a Postgres database.** Render, Supabase, or Neon all offer a free
+tier — create one and copy its connection string. If you use Render for
+both the database and the backend below, create the database first so you
+have the connection string ready.
+
+**2. Put the project on GitHub** (Render/Netlify/Vercel all deploy by
 connecting to a Git repo):
 ```bash
 cd car-rental-app
@@ -26,36 +31,41 @@ git commit -m "Car rental app"
 Create a new repo on github.com, then follow its "push an existing
 repository" instructions.
 
-**2. Deploy the backend to Render** (free tier available):
+**3. Deploy the backend to Render** (free tier available):
 - render.com → sign up → **New → Web Service** → connect your GitHub repo
 - **Root directory:** `backend`
 - **Build command:** `npm install`
 - **Start command:** `npm start`
-- Add environment variables (same keys as `backend/.env`): `PORT` (Render
-  sets this automatically, you can omit it), `WHATSAPP_NUMBER`,
-  `BUSINESS_NAME`, `OPEN_HOUR`, `CLOSE_HOUR`, and `CORS_ORIGIN` — leave
-  `CORS_ORIGIN` for now, you'll set it after step 3.
-- Deploy. You'll get a URL like `https://your-app.onrender.com`.
+- Add environment variables (same keys as `backend/.env`): `DATABASE_URL`
+  (from step 1), `JWT_SECRET` (generate one — see `backend/README.md`),
+  `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `WHATSAPP_NUMBER`, `BUSINESS_NAME`,
+  `OPEN_HOUR`, `CLOSE_HOUR`. Leave `CORS_ORIGIN` and `ADMIN_CORS_ORIGIN` for
+  now, you'll set them after steps 4 and 5.
+- Deploy. You'll get a URL like `https://your-app.onrender.com`. On first
+  boot it creates your tables, seeds your cars, and creates your first admin
+  login automatically — check the deploy logs to confirm.
 - Note: Render's free tier sleeps after 15 minutes of inactivity and takes
-  30–60 seconds to wake up on the next request. Fine for testing; if that
-  delay matters for real customers, their paid Starter tier removes it.
+  30–60 seconds to wake up on the next request. Fine for testing; their
+  paid Starter tier removes it if that delay matters for real customers.
 
-**3. Deploy the frontend to Netlify or Vercel** (both free for this):
-- netlify.com or vercel.com → sign up → import your GitHub repo
-- **Root directory:** `frontend`
-- **Build command:** `npm run build`
-- **Publish directory:** `dist`
-- Add an environment variable: `VITE_API_URL` =
-  `https://your-app.onrender.com/api` (your real Render URL from step 2,
-  with `/api` on the end)
+**4. Deploy the customer frontend to Netlify or Vercel** (free):
+- Import your GitHub repo → **Root directory:** `frontend` → **Build
+  command:** `npm run build` → **Publish directory:** `dist`
+- Environment variable: `VITE_API_URL` = `https://your-app.onrender.com/api`
 - Deploy. You'll get a URL like `https://your-app.netlify.app`.
 
-**4. Connect the two + your domain:**
-- Back in Render, set `CORS_ORIGIN` to your real frontend URL from step 3
-  (or your custom domain once you attach one), then redeploy the backend.
-- In Netlify/Vercel, go to Domain settings and follow their instructions to
-  point your own domain (the one you'd have used for WordPress) at this
-  deployment instead.
+**5. Deploy the admin app the same way, as a SEPARATE site:**
+- Import the same repo again as a new site → **Root directory:** `admin` →
+  same build command/publish directory → same `VITE_API_URL`
+- You'll get a second URL, e.g. `https://your-app-admin.netlify.app`
+
+**6. Connect everything:**
+- Back in Render, set `CORS_ORIGIN` to your step-4 URL and
+  `ADMIN_CORS_ORIGIN` to your step-5 URL, then redeploy the backend.
+- In Netlify/Vercel, point your real domain at the customer frontend (step
+  4). The admin app (step 5) can stay on its free `*.netlify.app` /
+  `*.vercel.app` URL, or use a subdomain like `admin.yourbusiness.com` — no
+  need to put it on your main domain since it's not public-facing.
 
 That's it — no WordPress involved anywhere.
 
@@ -66,8 +76,8 @@ produces separate hashed `.js`/`.css` files with specific load order, and
 WordPress's editor will mangle or strip parts of that if pasted in as
 content. The clean way to do this is a **subdomain**:
 
-1. Do steps 1–4 from Path A exactly as written, but in step 4 point a
-   **subdomain** at the frontend instead of your main domain — e.g.
+1. Do steps 1–6 from Path A exactly as written, but in step 6 point a
+   **subdomain** at the customer frontend instead of your main domain — e.g.
    `book.yourbusiness.com` via a CNAME record in your domain's DNS settings
    (Netlify/Vercel's domain instructions will show you exactly what record
    to add).

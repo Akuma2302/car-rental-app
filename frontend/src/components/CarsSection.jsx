@@ -18,8 +18,9 @@ function CarsSection({ cars, loading, error }) {
 
         {error && (
           <p className="state-message state-error">
-            Couldn&rsquo;t reach the booking server. Make sure the backend is running on port 4000
-            (<code>npm run dev</code> inside <code>backend/</code>), then refresh.
+            Couldn&rsquo;t reach the booking server. If you&rsquo;re running this locally, make sure the
+            backend is started (<code>npm run dev</code> inside <code>backend/</code>). If this is the
+            live site, check that the backend is deployed and reachable, then refresh.
           </p>
         )}
 
