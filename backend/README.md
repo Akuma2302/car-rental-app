@@ -33,7 +33,9 @@ backend/
 ## Setup
 
 **1. Get a Postgres database.** Free options: Render (New → PostgreSQL),
-Supabase, or Neon. Copy its connection string.
+Supabase, or Neon. Copy its connection string. Using Supabase specifically?
+See `SUPABASE_SETUP.md` in this folder — one connection-string detail trips
+people up (which one to copy) and it's worth doing right the first time.
 
 **2. Configure:**
 ```bash
