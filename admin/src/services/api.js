@@ -1,5 +1,5 @@
 // Set VITE_API_URL when deploying. Falls back to the local backend for `npm run dev`.
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://car-rental-app-fxns.onrender.com/api';
 
 export async function request(path, { token, headers, ...options } = {}) {
   const finalHeaders = { 'Content-Type': 'application/json', ...headers };
