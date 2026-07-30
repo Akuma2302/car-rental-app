@@ -1,17 +1,33 @@
+import { useMemo, useState } from 'react';
 import SectionHeading from './SectionHeading.jsx';
 import CarCard from './CarCard.jsx';
+import FiltersBar, { DEFAULT_FILTERS } from './FiltersBar.jsx';
 import { useBookingContext } from '../context/BookingContext.jsx';
+
+function applyFilters(cars, filters) {
+  return cars.filter((car) => {
+    if (filters.transmission && car.transmission !== filters.transmission) return false;
+    if (filters.fuelType && car.fuelType !== filters.fuelType) return false;
+    if (filters.seats && String(car.seats) !== String(filters.seats)) return false;
+    if (filters.category && car.category !== filters.category) return false;
+    if (filters.maxPricePerDay && car.pricePerDay > Number(filters.maxPricePerDay)) return false;
+    return true;
+  });
+}
 
 function CarsSection({ cars, loading, error }) {
   const { openBooking } = useBookingContext();
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+
+  const filteredCars = useMemo(() => applyFilters(cars, filters), [cars, filters]);
 
   return (
     <section className="cars reveal" id="cars">
       <div className="container">
         <SectionHeading
           eyebrow="Our fleet"
-          title="Tap a car to check the schedule"
-          description="Every listing shows real availability — choose a date, pick an open time slot, and confirm straight to our team on WhatsApp."
+          title="Real-time fleet, transparent pricing"
+          description="Full specs, tiered pricing, and real availability for every car — filter to find the right fit, then book straight through to WhatsApp."
         />
 
         {loading && <p className="state-message">Loading cars…</p>}
@@ -25,11 +41,19 @@ function CarsSection({ cars, loading, error }) {
         )}
 
         {!loading && !error && (
-          <div className="car-grid">
-            {cars.map((car) => (
-              <CarCard key={car.id} car={car} onCheckAvailability={openBooking} />
-            ))}
-          </div>
+          <>
+            <FiltersBar filters={filters} onChange={setFilters} resultCount={filteredCars.length} />
+
+            {filteredCars.length === 0 ? (
+              <p className="state-message">No cars match those filters — try widening your search.</p>
+            ) : (
+              <div className="car-grid">
+                {filteredCars.map((car) => (
+                  <CarCard key={car.id} car={car} onCheckAvailability={openBooking} />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>

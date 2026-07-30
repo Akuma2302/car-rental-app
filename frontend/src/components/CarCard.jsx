@@ -1,30 +1,41 @@
 import Button from './Button.jsx';
-import { CarGlyph } from './icons.jsx';
-
-const TINTS = { amber: '#d88f22', jade: '#2e8b79', dusk: '#3a4368' };
+import ImageCarousel from './ImageCarousel.jsx';
 
 function CarCard({ car, onCheckAvailability }) {
-  const tint = TINTS[car.accent] || TINTS.amber;
-
   return (
     <div className="car-card">
-      <div className="car-art" style={{ background: `${tint}14` }}>
-        <span className="car-art-tag">
-          {car.seats} seats · {car.transmission}
-        </span>
-        <CarGlyph tint={tint} />
-      </div>
+      <ImageCarousel images={car.images} altText={car.name} accent={car.accent} />
+
       <div className="car-body">
+        <div className="car-badges">
+          <span className="badge">{car.category}</span>
+          <span className="badge">{car.fuelType}</span>
+          <span className="badge">{car.transmission}</span>
+          <span className="badge">{car.seats} seats</span>
+        </div>
+
         <h3>{car.name}</h3>
         <div className="car-meta">
           <span>{car.tagline}</span>
         </div>
-        <div className="car-foot">
-          <div className="price">
-            RM{car.pricePerDay}
-            <small> /day</small>
+
+        <div className="car-pricing">
+          <div className="price-tier">
+            <b>RM{car.pricePerHour}</b>
+            <span>/hour</span>
           </div>
-          <Button className="car-check-btn" onClick={() => onCheckAvailability(car.id)}>
+          <div className="price-tier">
+            <b>RM{car.pricePerHalfDay}</b>
+            <span>/half-day</span>
+          </div>
+          <div className="price-tier price-tier-main">
+            <b>RM{car.pricePerDay}</b>
+            <span>/day</span>
+          </div>
+        </div>
+
+        <div className="car-foot">
+          <Button className="car-check-btn btn-block" onClick={() => onCheckAvailability(car.id)}>
             Check availability
           </Button>
         </div>

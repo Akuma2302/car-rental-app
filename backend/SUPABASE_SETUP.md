@@ -90,6 +90,38 @@ actually named `DATABASE_URL` (exact spelling) in your host's dashboard,
 and that you redeployed after adding it — most hosts don't pick up new env
 vars on an already-running instance.
 
+## 5. Set up image storage (for vehicle photos)
+
+The admin app uploads vehicle photos through the backend to Supabase
+Storage. One-time setup:
+
+1. In your Supabase project, go to **Storage** in the left sidebar → **New
+   bucket**
+2. Name it `car-images` (or anything — just match `STORAGE_BUCKET` in
+   `.env` if you pick something else)
+3. Toggle **Public bucket** ON — image URLs need to load directly in
+   `<img>` tags without authentication
+4. That's it — no RLS policies to configure. The backend uploads using your
+   **service role key**, which bypasses Storage's access policies entirely
+   (same reasoning as the RLS note above: this project's backend is a
+   trusted server, not a public client).
+
+Now get the service role key: **Project Settings → API** → under "Project
+API keys", copy the **service_role** key (not the `anon`/public one — that
+one intentionally can't do privileged things like this).
+
+Set in `.env`:
+```
+SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...   (the service_role key, not anon)
+STORAGE_BUCKET=car-images
+```
+
+**Keep the service role key secret** — it has full access to your project,
+bypassing every access rule. Never put it in frontend code or commit it to
+a public repo (same as `JWT_SECRET` and `DATABASE_URL` — it only ever goes
+in the backend's `.env` or your host's environment variables).
+
 ## Optional: browsing your data
 
 Since it's Supabase, you also get a web-based table browser for free —

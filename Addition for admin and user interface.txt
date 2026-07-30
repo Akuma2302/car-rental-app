@@ -1,0 +1,13 @@
+for the booking section, we need to put the search filter, the option we have is tranmission type (manual/auto), fuel/EV, seating capacity (5/7), vehicle category (SUV,Sedan,Luxury) and price range(per hour, half day, full day)
+
+
+
+also for the Real-time Fleet Display: Transparent view of available cars with detailed specs, pricing (per hour/day), high-res images 
+
+
+
+same goes for the admin, the admin can add new vehilce by the extra detail provide above and also add image of the vehicle. if picture more than one, make it in carousell 
+
+then they track which vehicle had been book or not and how long the period
+
+at the admin interface, can also add new tab for dashboard as overview for all the vehicle

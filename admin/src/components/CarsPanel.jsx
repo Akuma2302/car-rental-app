@@ -52,6 +52,10 @@ function CarsPanel() {
     }
   }
 
+  function handleImagesChanged(carId, images) {
+    setCars((prev) => prev.map((c) => (c.id === carId ? { ...c, images } : c)));
+  }
+
   return (
     <div className="panel">
       <div className="panel-toolbar">
@@ -70,6 +74,7 @@ function CarsPanel() {
           initialValue={editingCar === 'new' ? null : editingCar}
           onCancel={() => setEditingCar(null)}
           onSave={handleSave}
+          onImagesChanged={(images) => handleImagesChanged(editingCar.id, images)}
         />
       )}
 
@@ -81,33 +86,48 @@ function CarsPanel() {
           <table className="data-table">
             <thead>
               <tr>
+                <th>Photo</th>
                 <th>Car</th>
+                <th>Category</th>
+                <th>Fuel</th>
                 <th>Seats</th>
-                <th>Transmission</th>
-                <th>Price/day</th>
+                <th>Pricing</th>
                 <th aria-label="Actions" />
               </tr>
             </thead>
             <tbody>
-              {cars.map((car) => (
-                <tr key={car.id}>
-                  <td>
-                    <strong>{car.name}</strong>
-                    <div className="table-muted">{car.tagline}</div>
-                  </td>
-                  <td>{car.seats}</td>
-                  <td>{car.transmission}</td>
-                  <td>RM{car.pricePerDay}</td>
-                  <td className="table-actions">
-                    <button className="btn btn-outline btn-sm" onClick={() => setEditingCar(car)}>
-                      Edit
-                    </button>
-                    <button className="btn btn-outline btn-sm btn-danger" onClick={() => handleDelete(car)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {cars.map((car) => {
+                const cover = car.images?.[0];
+                return (
+                  <tr key={car.id}>
+                    <td>
+                      {cover ? (
+                        <img className="row-thumb" src={cover.url} alt="" />
+                      ) : (
+                        <span className="row-thumb row-thumb-empty">No photo</span>
+                      )}
+                    </td>
+                    <td>
+                      <strong>{car.name}</strong>
+                      <div className="table-muted">{car.tagline}</div>
+                    </td>
+                    <td>{car.category}</td>
+                    <td>{car.fuelType}</td>
+                    <td>{car.transmission} · {car.seats}</td>
+                    <td className="table-muted">
+                      RM{car.pricePerHour}/hr · RM{car.pricePerHalfDay}/half · RM{car.pricePerDay}/day
+                    </td>
+                    <td className="table-actions">
+                      <button className="btn btn-outline btn-sm" onClick={() => setEditingCar(car)}>
+                        Edit
+                      </button>
+                      <button className="btn btn-outline btn-sm btn-danger" onClick={() => handleDelete(car)}>
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

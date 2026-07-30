@@ -27,11 +27,21 @@ than one admin login, insert a row into the `admin_users` table directly
 
 ## What it does
 
-- **Bookings tab:** every booking ever made, newest first, with a search box
-  (matches customer name, phone, or car). Read-only — bookings aren't
-  editable/cancelable from here yet.
-- **Cars tab:** add, edit, or delete cars. Changes show up on the public
-  site immediately (both apps read from the same `cars` table).
+- **Dashboard tab:** fleet overview at a glance — total cars, how many are
+  out on rent right now, this week's bookings and revenue, a list of
+  currently-active rentals with when each is due back, and a status chip
+  per car.
+- **Bookings tab:** every booking ever made, newest first, with pick-up/
+  return date-times, duration, and total price — searchable by customer
+  name, phone, or car. Read-only — bookings aren't editable/cancelable from
+  here yet.
+- **Cars tab:** add, edit, or delete cars — including transmission, fuel
+  type, category, seats, and three pricing tiers (hourly/half-day/daily).
+  Upload up to 8 photos per car (JPEG/PNG/WebP, 8MB each) and pick which one
+  is the cover photo; more than one photo automatically becomes a carousel
+  on the public site. Changes show up there immediately (both apps read
+  from the same tables). Photo uploads need Supabase Storage configured on
+  the backend first — see `backend/SUPABASE_SETUP.md`.
 
 ## How auth works
 

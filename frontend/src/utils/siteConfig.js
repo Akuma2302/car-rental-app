@@ -10,6 +10,11 @@ export const siteConfig = {
   phoneHref: 'tel:+60172507341',
   whatsappNumber: '60172507341',
   hours: 'Daily, 7:00am – 10:00pm',
+  // Numeric form of the same hours, used to build the pickup/return time
+  // selects in the booking modal. Keep in sync with the string above and
+  // with OPEN_HOUR/CLOSE_HOUR in backend/.env.
+  openHour: 7,
+  closeHour: 22,
   address: {
     line1: '[Your Street Address]',
     line2: '[Postcode] [City]',

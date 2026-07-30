@@ -39,7 +39,10 @@ repository" instructions.
 - Add environment variables (same keys as `backend/.env`): `DATABASE_URL`
   (from step 1), `JWT_SECRET` (generate one — see `backend/README.md`),
   `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `WHATSAPP_NUMBER`, `BUSINESS_NAME`,
-  `OPEN_HOUR`, `CLOSE_HOUR`. Leave `CORS_ORIGIN` and `ADMIN_CORS_ORIGIN` for
+  `OPEN_HOUR`, `CLOSE_HOUR`, `HALF_DAY_THRESHOLD_HOURS`,
+  `FULL_DAY_THRESHOLD_HOURS`, and — if you want image uploads working —
+  `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `STORAGE_BUCKET` (see
+  `backend/SUPABASE_SETUP.md`). Leave `CORS_ORIGIN` and `ADMIN_CORS_ORIGIN` for
   now, you'll set them after steps 4 and 5.
 - Deploy. You'll get a URL like `https://your-app.onrender.com`. On first
   boot it creates your tables, seeds your cars, and creates your first admin

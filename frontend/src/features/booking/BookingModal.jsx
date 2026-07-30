@@ -1,33 +1,57 @@
 import { useEffect, useState } from 'react';
 import { useBookingContext } from '../../context/BookingContext.jsx';
-import { useAvailability } from '../../hooks/useAvailability.js';
+import { useBookedRanges } from '../../hooks/useBookedRanges.js';
+import { usePriceQuote } from '../../hooks/usePriceQuote.js';
 import { createBooking } from '../../services/bookingService.js';
-import { todayStr, maxDateStr, formatNiceDate } from '../../utils/date.js';
-import { filterVisibleSlots } from '../../utils/slots.js';
+import { todayStr, maxDateStr, combineDateTime, formatRangeShort, defaultReturn } from '../../utils/date.js';
+import { findConflict } from '../../utils/rangeOverlap.js';
+import { siteConfig } from '../../utils/siteConfig.js';
 import Button from '../../components/Button.jsx';
 import { CloseIcon, CheckIcon } from '../../components/icons.jsx';
-import TimeSlotGrid from './TimeSlotGrid.jsx';
+import DateTimeField from './DateTimeField.jsx';
+
+function defaultPickupTime() {
+  const nextHour = Math.min(Math.max(new Date().getHours() + 1, siteConfig.openHour), siteConfig.closeHour);
+  return `${String(nextHour).padStart(2, '0')}:00`;
+}
 
 function BookingModal({ cars }) {
   const { activeCarId, isOpen, closeBooking } = useBookingContext();
   const car = cars.find((c) => c.id === activeCarId) || null;
 
-  const [date, setDate] = useState(todayStr());
-  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [pickupDate, setPickupDate] = useState(todayStr());
+  const [pickupTime, setPickupTime] = useState(defaultPickupTime());
+  const [returnDate, setReturnDate] = useState(todayStr());
+  const [returnTime, setReturnTime] = useState(defaultPickupTime());
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [status, setStatus] = useState('idle'); // idle | submitting | success | error
   const [errorMessage, setErrorMessage] = useState('');
 
-  const { data: availability, loading, reload } = useAvailability(isOpen ? activeCarId : null, date);
+  const { ranges: bookedRanges, reload: reloadRanges } = useBookedRanges(
+    isOpen ? activeCarId : null,
+    todayStr(),
+    maxDateStr(180)
+  );
+
+  const startAt = combineDateTime(pickupDate, pickupTime);
+  const endAt = combineDateTime(returnDate, returnTime);
+  const { quote, loading: quoteLoading } = usePriceQuote(activeCarId, startAt, endAt);
+  const conflict = findConflict(startAt, endAt, bookedRanges);
+  const validRange = startAt && endAt && new Date(endAt) > new Date(startAt);
 
   // Reset the form fresh every time a (new) car is opened.
   useEffect(() => {
     if (isOpen) {
-      // Same standard pattern noted in hooks/useCars.js.
+      const pDate = todayStr();
+      const pTime = defaultPickupTime();
+      // Standard fetch/reset-on-mount pattern (react.dev/learn/synchronizing-with-effects).
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setDate(todayStr());
-      setSelectedSlot(null);
+      setPickupDate(pDate);
+      setPickupTime(pTime);
+      const ret = defaultReturn(pDate, pTime);
+      setReturnDate(ret.date);
+      setReturnTime(ret.time);
       setName('');
       setPhone('');
       setStatus('idle');
@@ -35,16 +59,26 @@ function BookingModal({ cars }) {
     }
   }, [activeCarId, isOpen]);
 
+  // Keep the return date roughly a day ahead when the pickup date changes,
+  // so the fields don't silently produce an invalid (end before start) range.
+  useEffect(() => {
+    if (!isOpen) return;
+    if (returnDate < pickupDate) {
+      const ret = defaultReturn(pickupDate, pickupTime);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setReturnDate(ret.date);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pickupDate]);
+
   // Escape-to-close + lock background scroll while open.
   useEffect(() => {
     if (!isOpen) return undefined;
-
     function handleKey(e) {
       if (e.key === 'Escape') closeBooking();
     }
     document.addEventListener('keydown', handleKey);
     document.body.style.overflow = 'hidden';
-
     return () => {
       document.removeEventListener('keydown', handleKey);
       document.body.style.overflow = '';
@@ -53,16 +87,11 @@ function BookingModal({ cars }) {
 
   if (!isOpen || !car) return null;
 
-  const visibleSlots = filterVisibleSlots(availability?.slots, date);
-
-  function handleDateChange(e) {
-    setDate(e.target.value);
-    setSelectedSlot(null);
-  }
+  const canSubmit = validRange && !conflict && name.trim() && phone.trim() && status !== 'submitting';
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!selectedSlot || !name.trim() || !phone.trim()) return;
+    if (!canSubmit) return;
 
     setStatus('submitting');
     setErrorMessage('');
@@ -70,8 +99,8 @@ function BookingModal({ cars }) {
     try {
       const result = await createBooking({
         carId: car.id,
-        date,
-        time: selectedSlot,
+        startAt,
+        endAt,
         customerName: name.trim(),
         customerPhone: phone.trim(),
       });
@@ -81,20 +110,15 @@ function BookingModal({ cars }) {
       setStatus('error');
       setErrorMessage(err.message || 'Something went wrong. Please try again.');
       if (err.status === 409) {
-        // Someone else grabbed the slot first — drop the stale selection
-        // and pull fresh availability so the grid reflects reality.
-        setSelectedSlot(null);
-        reload();
+        reloadRanges();
       }
     }
   }
 
   function handleBookAgain() {
     setStatus('idle');
-    setSelectedSlot(null);
     setName('');
     setPhone('');
-    setDate(todayStr());
   }
 
   function handleOverlayClick(e) {
@@ -119,40 +143,61 @@ function BookingModal({ cars }) {
         <div className="modal-body">
           {status !== 'success' ? (
             <form className="booking-form" onSubmit={handleSubmit}>
-              <div className="field">
-                <label htmlFor="dateInput">Pickup date</label>
-                <input
-                  id="dateInput"
-                  type="date"
-                  min={todayStr()}
-                  max={maxDateStr()}
-                  value={date}
-                  onChange={handleDateChange}
-                  required
-                />
-              </div>
+              <DateTimeField
+                label="Pick-up"
+                idPrefix="pickup"
+                dateValue={pickupDate}
+                timeValue={pickupTime}
+                onDateChange={setPickupDate}
+                onTimeChange={setPickupTime}
+                min={todayStr()}
+                max={maxDateStr()}
+              />
+              <DateTimeField
+                label="Return"
+                idPrefix="return"
+                dateValue={returnDate}
+                timeValue={returnTime}
+                onDateChange={setReturnDate}
+                onTimeChange={setReturnTime}
+                min={pickupDate}
+                max={maxDateStr()}
+              />
 
-              <div className="field">
-                <label>Available times</label>
-                {loading ? (
-                  <p className="no-slots">Checking availability…</p>
-                ) : (
-                  <TimeSlotGrid slots={visibleSlots} selected={selectedSlot} onSelect={setSelectedSlot} />
-                )}
-                <div className="slot-legend">
-                  <span>
-                    <i className="dot ok" /> available
-                  </span>
-                  <span>
-                    <i className="dot no" /> already booked
-                  </span>
-                </div>
-              </div>
+              {!validRange && (
+                <p className="form-error">Return must be after pick-up.</p>
+              )}
 
-              {selectedSlot && (
+              {validRange && conflict && (
+                <p className="form-error">
+                  That range overlaps an existing booking ({formatRangeShort(conflict.startAt)} –{' '}
+                  {formatRangeShort(conflict.endAt)}). Pick a different date or time.
+                </p>
+              )}
+
+              {validRange && !conflict && (
                 <div className="selection-recap show">
-                  {car.name} · {formatNiceDate(date)} · {selectedSlot}
+                  {quoteLoading && 'Calculating price…'}
+                  {!quoteLoading && quote && (
+                    <>
+                      {quote.duration} · <b>RM{quote.totalPrice}</b> total
+                    </>
+                  )}
                 </div>
+              )}
+
+              {bookedRanges.length > 0 && (
+                <details className="booked-ranges-details">
+                  <summary>{bookedRanges.length} existing booking{bookedRanges.length === 1 ? '' : 's'} on this car</summary>
+                  <ul className="booked-ranges-list">
+                    {bookedRanges.map((r, i) => (
+                      // eslint-disable-next-line react/no-array-index-key
+                      <li key={i}>
+                        {formatRangeShort(r.startAt)} – {formatRangeShort(r.endAt)}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
               )}
 
               <div className="field">
@@ -180,7 +225,7 @@ function BookingModal({ cars }) {
 
               {status === 'error' && <p className="form-error">{errorMessage}</p>}
 
-              <Button type="submit" block disabled={!selectedSlot || status === 'submitting'}>
+              <Button type="submit" block disabled={!canSubmit}>
                 {status === 'submitting' ? 'Confirming…' : 'Confirm via WhatsApp'}
               </Button>
               <p className="whatsapp-note">

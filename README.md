@@ -10,9 +10,11 @@ car-rental-app/
 └── backend/     → Node.js + Express + Postgres API. See backend/README.md
 ```
 
-Real availability, a database-level guarantee against double-booking, admin
-login with hashed passwords, and a booking flow that hands off to WhatsApp —
-no simulated data, no fake admin auth.
+Real availability, a database-level guarantee against double-booking (even
+across overlapping multi-day rentals), filterable fleet browsing with
+photos, tiered hourly/half-day/daily pricing, admin login with hashed
+passwords, and a booking flow that hands off to WhatsApp — no simulated
+data, no fake admin auth.
 
 ## Quick start
 
@@ -51,17 +53,24 @@ of failing silently if they can't reach it.
 
 ## How a booking actually flows
 
-1. Customer site loads → fetches the real car list from `GET /api/cars`.
-2. Customer clicks a car → picks a date → fetches
-   `GET /api/cars/:id/availability?date=...` → backend checks the database
-   and returns which hours are genuinely still open.
-3. Customer picks a slot, fills in name + phone, confirms →
-   `POST /api/bookings`. The database's own unique constraint guarantees
-   the slot can't be double-booked, even if two people click at once.
-4. Backend saves the booking and returns a `wa.me` link with the booking
-   pre-filled as text; the customer's browser opens it, they hit send.
-5. **The booking is now visible in the admin dashboard** — Bookings tab,
-   searchable by customer name, phone, or car — the moment it's created.
+1. Customer site loads → fetches the real car list from `GET /api/cars`,
+   with photos and specs. Filter by transmission, fuel type, seats,
+   category, or price.
+2. Customer clicks a car → picks a pick-up date/time and a return
+   date/time (any duration — hours, a day, or a week) → the page fetches
+   already-booked ranges for that car so obvious conflicts are flagged
+   before submitting, and a live price quote as the dates change.
+3. Customer fills in name + phone, confirms → `POST /api/bookings`. The
+   database's own range-overlap constraint guarantees the car can't be
+   double-booked for that period, even if two people submit at once.
+4. Backend computes the final price server-side (hourly/half-day/daily
+   tier, based on duration), saves the booking, and returns a `wa.me` link
+   with everything pre-filled; the customer's browser opens it, they hit
+   send.
+5. **The booking is now visible in the admin dashboard** — Dashboard tab
+   shows it's reflected in "on rent now" / revenue stats immediately;
+   Bookings tab lists it with duration and total price, searchable by
+   customer name, phone, or car.
 
 ## What to edit for your business
 
@@ -69,9 +78,11 @@ of failing silently if they can't reach it.
 |---|---|
 | Business name, phone (display), hours, address, social links, map | `frontend/src/utils/siteConfig.js` |
 | The WhatsApp number bookings actually get sent to | `backend/.env` → `WHATSAPP_NUMBER` |
-| Cars, prices, seats, transmission | Admin app → Cars tab (not `cars.json` — that's a one-time seed only) |
-| Operating hours used for slot generation | `backend/.env` → `OPEN_HOUR` / `CLOSE_HOUR` |
+| Cars, prices (hourly/half-day/daily), specs, photos | Admin app → Cars tab (not `cars.json` — that's a one-time seed only) |
+| Pricing-tier cutoffs (what counts as "half-day" vs "full day") | `backend/.env` → `HALF_DAY_THRESHOLD_HOURS` / `FULL_DAY_THRESHOLD_HOURS` |
+| Counter hours shown in the pickup/return time picker | `frontend/src/utils/siteConfig.js` (display-only — see backend README's "Known limitations") |
 | Admin login | `backend/.env` → `ADMIN_USERNAME` / `ADMIN_PASSWORD` (first run only) |
+| Vehicle image storage | Supabase Storage — see `backend/SUPABASE_SETUP.md` |
 
 ## Deploying
 

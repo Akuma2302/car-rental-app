@@ -4,6 +4,12 @@ export function fetchCars() {
   return request('/cars');
 }
 
-export function fetchAvailability(carId, date) {
-  return request(`/cars/${carId}/availability?date=${date}`);
+export function fetchBookedRanges(carId, from, to) {
+  return request(`/cars/${carId}/booked-ranges?from=${from}&to=${to}`);
+}
+
+export function fetchPriceQuote(carId, startAt, endAt) {
+  return request(
+    `/cars/${carId}/price-quote?startAt=${encodeURIComponent(startAt)}&endAt=${encodeURIComponent(endAt)}`
+  );
 }

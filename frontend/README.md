@@ -1,8 +1,9 @@
 # Car Rental — Frontend (React + Vite)
 
-The car rental landing page: hero, live car listings, a booking modal with
-real per-car time-slot availability, USP section, location/map, and footer.
-Talks to the `backend/` API for everything — no fake/simulated data.
+The car rental landing page: hero, a filterable fleet listing with photos
+and tiered pricing, a booking modal for full date+time range rentals with
+live pricing, USP section, location/map, and footer. Talks to the
+`backend/` API for everything — no fake/simulated data.
 
 ## Folder structure
 
@@ -11,15 +12,15 @@ frontend/
 ├── public/               # served as-is (favicon)
 ├── src/
 │   ├── assets/           # imported/build-processed static files (see its README)
-│   ├── components/       # reusable UI: Button, CarCard, icons, page sections
+│   ├── components/       # reusable UI: Button, CarCard, ImageCarousel, FiltersBar, icons, page sections
 │   ├── layout/            # Header, Footer
 │   ├── pages/             # Home.jsx — assembles the whole page
-│   ├── features/booking/  # the booking modal + its time-slot grid
-│   ├── hooks/              # useCars, useAvailability
+│   ├── features/booking/  # the booking modal + its date/time range fields
+│   ├── hooks/              # useCars, useBookedRanges, usePriceQuote
 │   ├── context/            # BookingContext — which car's modal is open
 │   ├── redux/              # not used yet — see its README for why
 │   ├── services/           # fetch calls to the backend API
-│   ├── utils/               # site content config, date/slot helpers
+│   ├── utils/               # site content config, date/range helpers
 │   ├── App.jsx
 │   ├── index.css
 │   └── main.jsx
@@ -72,8 +73,10 @@ Keep both in sync.
 
 ## Adding, removing, or repricing cars
 
-Cars aren't hardcoded in the frontend — edit `backend/data/cars.json` and
-refresh the page.
+Cars, their photos, and pricing aren't hardcoded in the frontend — manage
+them through the admin app's Cars tab. `backend/data/cars.json` only seeds
+the database the very first time it's empty; editing it afterward has no
+effect.
 
 ## Why ESLint is pinned to v8, not the latest
 

@@ -1,10 +1,9 @@
 # Car Rental — Backend (Node.js / Express / Postgres)
 
-REST API powering both the customer-facing site and the admin app: car
-listings, real per-car time-slot availability, booking creation (with a
-WhatsApp confirmation link built server-side), admin login, and admin
-booking/car management. Backed by a real Postgres database — no file-based
-storage, no simulated data.
+REST API powering both the customer-facing site and the admin app: filterable
+car listings with images, full date+time range booking with tiered pricing,
+a fleet-wide admin dashboard, and image uploads via Supabase Storage. Backed
+by a real Postgres database — no file-based storage, no simulated data.
 
 ## Folder structure
 
@@ -75,6 +74,9 @@ The API starts on **http://localhost:4000** (change with `PORT`).
 | `OPEN_HOUR` / `CLOSE_HOUR` | Daily operating hours (24h) | `7` / `22` |
 | `CORS_ORIGIN` | Customer frontend's origin | `http://localhost:5173` |
 | `ADMIN_CORS_ORIGIN` | Admin app's origin | `http://localhost:5174` |
+| `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | For vehicle image uploads — see `SUPABASE_SETUP.md` | *(required for image uploads only)* |
+| `STORAGE_BUCKET` | Supabase Storage bucket name for images | `car-images` |
+| `HALF_DAY_THRESHOLD_HOURS` / `FULL_DAY_THRESHOLD_HOURS` | Pricing tier cutoffs, in hours | `12` / `24` |
 
 ## Endpoints
 
@@ -82,9 +84,10 @@ The API starts on **http://localhost:4000** (change with `PORT`).
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/api/cars` | List all cars |
+| GET | `/api/cars` | List all cars, with images |
 | GET | `/api/cars/:carId` | Get one car |
-| GET | `/api/cars/:carId/availability?date=YYYY-MM-DD` | Open/booked time slots |
+| GET | `/api/cars/:carId/booked-ranges?from=...&to=...` | Already-booked date/time ranges (no customer info) |
+| GET | `/api/cars/:carId/price-quote?startAt=...&endAt=...` | Live price + duration for a proposed booking |
 | POST | `/api/bookings` | Create a booking → `{ booking, whatsappUrl }` |
 | POST | `/api/auth/login` | Admin login → `{ token, username }` |
 | GET | `/api/health` | Health check |
@@ -94,30 +97,51 @@ The API starts on **http://localhost:4000** (change with `PORT`).
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/api/admin/bookings` | Every booking ever made, with car name joined in |
+| GET | `/api/admin/dashboard` | Fleet overview — counts, currently-active rentals, this-week revenue |
 | POST | `/api/admin/cars` | Create a car |
 | PUT | `/api/admin/cars/:carId` | Update a car |
-| DELETE | `/api/admin/cars/:carId` | Delete a car |
+| DELETE | `/api/admin/cars/:carId` | Delete a car (cascades to its bookings/images) |
+| POST | `/api/admin/cars/:carId/images` | Upload 1–8 images (multipart, field name `images`) |
+| DELETE | `/api/admin/cars/:carId/images/:imageId` | Delete one image |
+| PUT | `/api/admin/cars/:carId/images/:imageId/cover` | Make an image the cover photo |
 
 `POST /api/bookings` body:
 ```json
 {
   "carId": "myvi",
-  "date": "2026-08-01",
-  "time": "10:00",
+  "startAt": "2026-08-01T09:00:00.000Z",
+  "endAt": "2026-08-03T09:00:00.000Z",
   "customerName": "Aiman Hakim",
   "customerPhone": "012-345 6789"
 }
 ```
-Returns `201` with `{ booking, whatsappUrl }`, `400` for invalid input, or
-`409` if that exact slot was booked a moment earlier — enforced by a real
-Postgres `UNIQUE(car_id, date, time)` constraint, not just an application
-check, so this holds true even under concurrent requests.
+Returns `201` with `{ booking, whatsappUrl }` (the booking includes a
+server-computed `totalPrice`), `400` for invalid input, or `409` if that
+range overlaps an existing booking — enforced by a real Postgres `EXCLUDE`
+constraint over the date range, not just an application check, so this
+holds true even under concurrent requests and for arbitrary-length rentals
+(hours to weeks), not just fixed slots.
+
+## Pricing
+
+Three tiers per car (`pricePerHour`, `pricePerHalfDay`, `pricePerDay`).
+`src/services/pricingService.js` picks one based on the requested duration:
+under `HALF_DAY_THRESHOLD_HOURS` (default 12) charges hourly × hours
+rounded up; under `FULL_DAY_THRESHOLD_HOURS` (default 24) charges a flat
+half-day rate; at or above charges the daily rate × number of days rounded
+up. Both thresholds are configurable in `.env`.
 
 ## Data
 
-Cars and bookings live in Postgres now — `data/cars.json` is only read once,
-to seed the table when it's empty. After that, add/edit/remove cars through
-the admin app; editing the JSON file has no effect anymore.
+Cars and bookings live in Postgres — `data/cars.json` is only read once, to
+seed the table when it's empty. After that, add/edit/remove cars through
+the admin app; editing the JSON file has no effect anymore. Vehicle photos
+live in Supabase Storage, referenced by URL in the `car_images` table.
+
+Every migration in `src/config/migrate.js` is safe to run against an
+already-deployed database with older data — it upgrades in place (adding
+columns, backfilling reasonable defaults for anything new) rather than
+assuming a fresh install. This runs automatically on every server start.
 
 ## Security notes
 
@@ -127,3 +151,21 @@ the admin app; editing the JSON file has no effect anymore.
   checks every admin route.
 - CORS only allows the two configured origins (`CORS_ORIGIN`,
   `ADMIN_CORS_ORIGIN`) — everything else is rejected with a 403.
+
+## Known limitations (by design, for a small-business launch)
+
+- `OPEN_HOUR`/`CLOSE_HOUR` are **not enforced server-side**. The frontend's
+  pickup/return time picker only offers hours within that range, but the
+  API itself will accept a booking at any hour if sent directly. Correctly
+  enforcing this server-side would need the business's actual timezone
+  configured — comparing a UTC timestamp's raw hour against "7am" is wrong
+  once the server and the business aren't in the same timezone, which is
+  the normal case here (Render's servers aren't in Malaysia). Left out
+  rather than shipped subtly incorrect; a reasonable next addition once
+  timezone handling is added.
+- The same `OPEN_HOUR`/`CLOSE_HOUR` values also live in
+  `frontend/src/utils/siteConfig.js` as a separate setting — the two must
+  be kept in sync by hand.
+- Deleting a car cascades to delete its bookings and image records (not
+  just orphan them) — intentional for a small fleet, but worth knowing
+  before deleting a car with booking history you want to keep.

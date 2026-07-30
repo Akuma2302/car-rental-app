@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { fetchAdminBookings } from '../services/bookingService.js';
-import { formatNiceDate, formatDateTime } from '../utils/date.js';
+import { formatDateTime } from '../utils/date.js';
+
+function durationLabel(startAt, endAt) {
+  const hours = (new Date(endAt) - new Date(startAt)) / (1000 * 60 * 60);
+  if (hours < 24) return `${Math.round(hours * 10) / 10}h`;
+  const days = Math.floor(hours / 24);
+  const rem = Math.round(hours % 24);
+  return rem > 0 ? `${days}d ${rem}h` : `${days}d`;
+}
 
 function BookingsPanel() {
   const { token, logout } = useAuth();
@@ -47,6 +55,8 @@ function BookingsPanel() {
       )
     : bookings;
 
+  const totalRevenue = filtered.reduce((sum, b) => sum + b.totalPrice, 0);
+
   return (
     <div className="panel">
       <div className="panel-toolbar">
@@ -58,7 +68,7 @@ function BookingsPanel() {
           className="search-input"
         />
         <span className="panel-count">
-          {filtered.length} booking{filtered.length === 1 ? '' : 's'}
+          {filtered.length} booking{filtered.length === 1 ? '' : 's'} · RM{totalRevenue} total
         </span>
       </div>
 
@@ -76,9 +86,11 @@ function BookingsPanel() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Time</th>
                 <th>Car</th>
+                <th>Pick-up</th>
+                <th>Return</th>
+                <th>Duration</th>
+                <th>Total</th>
                 <th>Customer</th>
                 <th>Phone</th>
                 <th>Booked on</th>
@@ -87,9 +99,11 @@ function BookingsPanel() {
             <tbody>
               {filtered.map((b) => (
                 <tr key={b.id}>
-                  <td>{formatNiceDate(b.date)}</td>
-                  <td>{b.time}</td>
                   <td>{b.carName}</td>
+                  <td>{formatDateTime(b.startAt)}</td>
+                  <td>{formatDateTime(b.endAt)}</td>
+                  <td className="table-muted">{durationLabel(b.startAt, b.endAt)}</td>
+                  <td>RM{b.totalPrice}</td>
                   <td>{b.customerName}</td>
                   <td>
                     <a href={`tel:${b.customerPhone}`}>{b.customerPhone}</a>

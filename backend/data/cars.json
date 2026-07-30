@@ -5,6 +5,10 @@
     "tagline": "Compact & easy to park",
     "seats": 5,
     "transmission": "Automatic",
+    "fuelType": "Petrol",
+    "category": "Sedan",
+    "pricePerHour": 15,
+    "pricePerHalfDay": 70,
     "pricePerDay": 120,
     "accent": "amber"
   },
@@ -14,6 +18,10 @@
     "tagline": "Comfortable city sedan",
     "seats": 5,
     "transmission": "Automatic",
+    "fuelType": "Petrol",
+    "category": "Sedan",
+    "pricePerHour": 20,
+    "pricePerHalfDay": 90,
     "pricePerDay": 160,
     "accent": "jade"
   },
@@ -23,6 +31,10 @@
     "tagline": "Spacious for family trips",
     "seats": 7,
     "transmission": "Automatic",
+    "fuelType": "Diesel",
+    "category": "SUV",
+    "pricePerHour": 28,
+    "pricePerHalfDay": 130,
     "pricePerDay": 220,
     "accent": "dusk"
   }
