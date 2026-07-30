@@ -281,6 +281,35 @@ code {
   border-color: var(--amber);
   outline: none;
 }
+.filter-select {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  font: inherit;
+  font-size: 0.9rem;
+  background: #fff;
+  color: var(--ink);
+}
+.filter-select:focus {
+  border-color: var(--amber);
+  outline: none;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+.status-pending {
+  background: rgba(242, 169, 59, 0.18);
+  color: var(--amber-dark);
+}
+.status-booked {
+  background: var(--jade-light);
+  color: var(--jade);
+}
 
 .table-wrap {
   overflow-x: auto;

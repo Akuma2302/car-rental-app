@@ -25,8 +25,9 @@ function DashboardPanel() {
         <StatCard label="Total cars" value={data.totalCars} />
         <StatCard label="On rent right now" value={data.carsOnRentNow} accent="amber" />
         <StatCard label="Available right now" value={data.carsAvailableNow} accent="jade" />
+        <StatCard label="Awaiting payment" value={data.pendingPayments} accent="amber" />
         <StatCard label="Bookings this week" value={data.bookingsThisWeek} />
-        <StatCard label="Revenue this week" value={`RM${data.revenueThisWeek}`} accent="jade" />
+        <StatCard label="Confirmed revenue this week" value={`RM${data.revenueThisWeek}`} accent="jade" />
         <StatCard label="Bookings all-time" value={data.totalBookings} />
       </div>
 
@@ -39,6 +40,7 @@ function DashboardPanel() {
             <table className="data-table">
               <thead>
                 <tr>
+                  <th>Status</th>
                   <th>Car</th>
                   <th>Customer</th>
                   <th>Phone</th>
@@ -48,6 +50,11 @@ function DashboardPanel() {
               <tbody>
                 {data.activeRentals.map((b) => (
                   <tr key={b.id}>
+                    <td>
+                      <span className={`status-badge status-${b.status}`}>
+                        {b.status === 'booked' ? 'Booked' : 'Pending'}
+                      </span>
+                    </td>
                     <td>{b.carName}</td>
                     <td>{b.customerName}</td>
                     <td>

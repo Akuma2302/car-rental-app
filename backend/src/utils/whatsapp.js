@@ -19,12 +19,16 @@ function formatDateTime(iso) {
 function buildWhatsappLink({ car, startAt, endAt, totalPrice, customerName, customerPhone }) {
   const message = [
     `New Booking Request - ${env.businessName}`,
+    `Status: PENDING (payment not yet confirmed)`,
     `Car: ${car.name}`,
     `Pick-up: ${formatDateTime(startAt)}`,
     `Return: ${formatDateTime(endAt)}`,
     `Total: RM${totalPrice}`,
     `Name: ${customerName}`,
     `Phone: ${customerPhone}`,
+    '',
+    'Please arrange payment with us here, then upload your receipt on the',
+    'website to confirm this booking.',
     '',
     '(Sent via website booking form)',
   ].join('\n');

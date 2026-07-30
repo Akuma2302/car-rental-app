@@ -12,4 +12,12 @@ const createBooking = asyncHandler(async (req, res) => {
   res.status(201).json(result);
 });
 
-module.exports = { createBooking };
+const confirmPayment = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'A receipt image is required' });
+  }
+  const booking = await bookingService.confirmPayment(req.params.bookingId, req.file);
+  res.json(booking);
+});
+
+module.exports = { createBooking, confirmPayment };

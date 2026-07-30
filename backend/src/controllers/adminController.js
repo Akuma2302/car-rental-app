@@ -20,7 +20,12 @@ const getDashboardOverview = asyncHandler(async (req, res) => {
   const now = Date.now();
   const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
   const bookingsThisWeek = allBookings.filter((b) => new Date(b.createdAt).getTime() >= oneWeekAgo);
-  const revenueThisWeek = bookingsThisWeek.reduce((sum, b) => sum + b.totalPrice, 0);
+  // Only count confirmed (paid) bookings as revenue — a pending booking
+  // hasn't actually been paid for yet.
+  const revenueThisWeek = bookingsThisWeek
+    .filter((b) => b.status === 'booked')
+    .reduce((sum, b) => sum + b.totalPrice, 0);
+  const pendingBookings = allBookings.filter((b) => b.status === 'pending');
 
   res.json({
     totalCars: cars.length,
@@ -29,6 +34,7 @@ const getDashboardOverview = asyncHandler(async (req, res) => {
     totalBookings: allBookings.length,
     bookingsThisWeek: bookingsThisWeek.length,
     revenueThisWeek,
+    pendingPayments: pendingBookings.length,
     activeRentals: activeNow,
     fleet: cars.map((car) => ({
       id: car.id,

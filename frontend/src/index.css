@@ -883,6 +883,10 @@ h3 {
   justify-content: center;
   margin: 0 auto 16px;
 }
+.success-state .check-pending {
+  background: rgba(242, 169, 59, 0.18);
+  color: var(--amber-dark);
+}
 .success-state h4 {
   font-size: 1.15rem;
   margin-bottom: 8px;
@@ -891,6 +895,31 @@ h3 {
   font-size: 0.9rem;
   color: var(--ink-soft);
   margin-bottom: 20px;
+}
+.success-state .btn-block + .btn-block {
+  margin-top: 10px;
+}
+
+.receipt-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+.receipt-upload input[type='file'] {
+  width: 100%;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--line);
+  background: #fff;
+  font-size: 0.86rem;
+}
+.receipt-upload-actions {
+  display: flex;
+  gap: 10px;
+}
+.receipt-upload-actions .btn {
+  flex: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {

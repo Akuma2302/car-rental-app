@@ -62,15 +62,19 @@ of failing silently if they can't reach it.
    before submitting, and a live price quote as the dates change.
 3. Customer fills in name + phone, confirms → `POST /api/bookings`. The
    database's own range-overlap constraint guarantees the car can't be
-   double-booked for that period, even if two people submit at once.
+   double-booked for that period, even if two people submit at once. The
+   booking is created with status **pending** — this reserves the slot and
+   opens WhatsApp, but isn't final yet.
 4. Backend computes the final price server-side (hourly/half-day/daily
    tier, based on duration), saves the booking, and returns a `wa.me` link
    with everything pre-filled; the customer's browser opens it, they hit
-   send.
-5. **The booking is now visible in the admin dashboard** — Dashboard tab
-   shows it's reflected in "on rent now" / revenue stats immediately;
-   Bookings tab lists it with duration and total price, searchable by
-   customer name, phone, or car.
+   send, and arranges payment with the business over WhatsApp.
+5. Back on the site, the customer uploads a photo of their payment receipt
+   and submits it → this flips the booking to status **booked**. This step
+   is what actually confirms the booking, not the WhatsApp message itself.
+6. **The booking is visible in the admin dashboard the whole time** — as
+   soon as it's created (marked "Pending"), and updates live once payment
+   is confirmed (marked "Booked", with a link to view the receipt).
 
 ## What to edit for your business
 

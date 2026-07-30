@@ -28,13 +28,14 @@ than one admin login, insert a row into the `admin_users` table directly
 ## What it does
 
 - **Dashboard tab:** fleet overview at a glance — total cars, how many are
-  out on rent right now, this week's bookings and revenue, a list of
-  currently-active rentals with when each is due back, and a status chip
-  per car.
+  out on rent right now, bookings awaiting payment confirmation, this
+  week's bookings and confirmed revenue, a list of currently-active
+  rentals with when each is due back, and a status chip per car.
 - **Bookings tab:** every booking ever made, newest first, with pick-up/
-  return date-times, duration, and total price — searchable by customer
-  name, phone, or car. Read-only — bookings aren't editable/cancelable from
-  here yet.
+  return date-times, duration, status (Pending/Booked), and total price —
+  searchable by customer name, phone, or car, and filterable by status. A
+  "View" link opens the uploaded payment receipt once a customer confirms
+  one. Read-only — bookings aren't editable/cancelable from here yet.
 - **Cars tab:** add, edit, or delete cars — including transmission, fuel
   type, category, seats, and three pricing tiers (hourly/half-day/daily).
   Upload up to 8 photos per car (JPEG/PNG/WebP, 8MB each) and pick which one

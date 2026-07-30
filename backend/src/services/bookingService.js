@@ -2,6 +2,7 @@ const carRepository = require('../repositories/carRepository');
 const bookingRepository = require('../repositories/bookingRepository');
 const { calculatePrice, describeDuration } = require('./pricingService');
 const { buildWhatsappLink } = require('../utils/whatsapp');
+const receiptService = require('./receiptService');
 
 const POSTGRES_EXCLUSION_VIOLATION = '23P01';
 
@@ -72,6 +73,31 @@ const bookingService = {
     const whatsappUrl = buildWhatsappLink({ car, startAt, endAt, totalPrice, customerName, customerPhone });
 
     return { booking, whatsappUrl };
+  },
+
+  /**
+   * Second step of the flow: customer uploads a payment receipt for a
+   * booking they already made via WhatsApp. Flips it from "pending" to
+   * "booked". Rejects if the booking doesn't exist or was already
+   * confirmed — this endpoint is public (no admin login), scoped only by
+   * the booking's own unguessable UUID, so it can't be used to tamper with
+   * someone else's booking without knowing its id.
+   */
+  async confirmPayment(bookingId, file) {
+    const booking = await bookingRepository.findById(bookingId);
+    if (!booking) {
+      const err = new Error('Booking not found');
+      err.status = 404;
+      throw err;
+    }
+    if (booking.status === 'booked') {
+      const err = new Error('This booking has already been confirmed.');
+      err.status = 409;
+      throw err;
+    }
+
+    const { url, storagePath } = await receiptService.uploadReceipt(bookingId, file);
+    return bookingRepository.confirmPayment(bookingId, { receiptUrl: url, receiptStoragePath: storagePath });
   },
 };
 

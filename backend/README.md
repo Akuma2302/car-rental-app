@@ -88,7 +88,8 @@ The API starts on **http://localhost:4000** (change with `PORT`).
 | GET | `/api/cars/:carId` | Get one car |
 | GET | `/api/cars/:carId/booked-ranges?from=...&to=...` | Already-booked date/time ranges (no customer info) |
 | GET | `/api/cars/:carId/price-quote?startAt=...&endAt=...` | Live price + duration for a proposed booking |
-| POST | `/api/bookings` | Create a booking → `{ booking, whatsappUrl }` |
+| POST | `/api/bookings` | Create a booking (always starts `pending`) → `{ booking, whatsappUrl }` |
+| POST | `/api/bookings/:bookingId/confirm-payment` | Upload a receipt (multipart, field `receipt`) → flips the booking to `booked` |
 | POST | `/api/auth/login` | Admin login → `{ token, username }` |
 | GET | `/api/health` | Health check |
 
@@ -121,6 +122,31 @@ range overlaps an existing booking — enforced by a real Postgres `EXCLUDE`
 constraint over the date range, not just an application check, so this
 holds true even under concurrent requests and for arbitrary-length rentals
 (hours to weeks), not just fixed slots.
+
+## Payment confirmation flow
+
+A booking is never immediately "final." It starts `pending` the instant a
+customer confirms via WhatsApp — that step only reserves the time range and
+opens WhatsApp with the details, it doesn't mean payment happened. The
+customer (or the business, relaying it) then arranges payment over
+WhatsApp, and the customer uploads a photo of their receipt through
+`POST /api/bookings/:bookingId/confirm-payment`, which is what actually
+flips the booking to `booked`.
+
+This endpoint is deliberately public (no admin login) — it's the customer
+completing their own booking, not an admin action. It's scoped by the
+booking's id, a random UUID, so it can't be guessed or enumerated; the
+endpoint also rejects with 404/409 if the booking doesn't exist or was
+already confirmed, so it can't be replayed or misused even if a receipt URL
+somehow leaked. Receipts upload to the same Supabase Storage bucket as car
+images, under a separate `receipts/` path.
+
+**Worth knowing:** a `pending` booking still holds its time range — the
+database's overlap constraint doesn't distinguish `pending` from `booked`,
+so an unpaid pending booking currently blocks that slot indefinitely rather
+than expiring automatically. Fine at small scale where a human is watching
+WhatsApp anyway; if no-shows start tying up the calendar, adding an
+expiry/cleanup job for old unpaid pending bookings would be the next step.
 
 ## Pricing
 

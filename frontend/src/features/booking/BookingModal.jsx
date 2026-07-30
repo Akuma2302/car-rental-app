@@ -9,12 +9,15 @@ import { siteConfig } from '../../utils/siteConfig.js';
 import Button from '../../components/Button.jsx';
 import { CloseIcon, CheckIcon } from '../../components/icons.jsx';
 import DateTimeField from './DateTimeField.jsx';
+import ReceiptUpload from './ReceiptUpload.jsx';
 
 function defaultPickupTime() {
   const nextHour = Math.min(Math.max(new Date().getHours() + 1, siteConfig.openHour), siteConfig.closeHour);
   return `${String(nextHour).padStart(2, '0')}:00`;
 }
 
+// idle -> submitting -> awaiting-payment -> confirmed
+//                     \-> error (booking creation failed)
 function BookingModal({ cars }) {
   const { activeCarId, isOpen, closeBooking } = useBookingContext();
   const car = cars.find((c) => c.id === activeCarId) || null;
@@ -25,8 +28,10 @@ function BookingModal({ cars }) {
   const [returnTime, setReturnTime] = useState(defaultPickupTime());
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [status, setStatus] = useState('idle'); // idle | submitting | success | error
+  const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [createdBookingId, setCreatedBookingId] = useState(null);
+  const [showReceiptUpload, setShowReceiptUpload] = useState(false);
 
   const { ranges: bookedRanges, reload: reloadRanges } = useBookedRanges(
     isOpen ? activeCarId : null,
@@ -56,6 +61,8 @@ function BookingModal({ cars }) {
       setPhone('');
       setStatus('idle');
       setErrorMessage('');
+      setCreatedBookingId(null);
+      setShowReceiptUpload(false);
     }
   }, [activeCarId, isOpen]);
 
@@ -105,7 +112,8 @@ function BookingModal({ cars }) {
         customerPhone: phone.trim(),
       });
       window.open(result.whatsappUrl, '_blank');
-      setStatus('success');
+      setCreatedBookingId(result.booking.id);
+      setStatus('awaiting-payment');
     } catch (err) {
       setStatus('error');
       setErrorMessage(err.message || 'Something went wrong. Please try again.');
@@ -115,10 +123,17 @@ function BookingModal({ cars }) {
     }
   }
 
+  function handlePaymentConfirmed() {
+    setStatus('confirmed');
+    setShowReceiptUpload(false);
+  }
+
   function handleBookAgain() {
     setStatus('idle');
     setName('');
     setPhone('');
+    setCreatedBookingId(null);
+    setShowReceiptUpload(false);
   }
 
   function handleOverlayClick(e) {
@@ -141,7 +156,7 @@ function BookingModal({ cars }) {
         </div>
 
         <div className="modal-body">
-          {status !== 'success' ? (
+          {status === 'idle' || status === 'submitting' || status === 'error' ? (
             <form className="booking-form" onSubmit={handleSubmit}>
               <DateTimeField
                 label="Pick-up"
@@ -164,9 +179,7 @@ function BookingModal({ cars }) {
                 max={maxDateStr()}
               />
 
-              {!validRange && (
-                <p className="form-error">Return must be after pick-up.</p>
-              )}
+              {!validRange && <p className="form-error">Return must be after pick-up.</p>}
 
               {validRange && conflict && (
                 <p className="form-error">
@@ -188,7 +201,9 @@ function BookingModal({ cars }) {
 
               {bookedRanges.length > 0 && (
                 <details className="booked-ranges-details">
-                  <summary>{bookedRanges.length} existing booking{bookedRanges.length === 1 ? '' : 's'} on this car</summary>
+                  <summary>
+                    {bookedRanges.length} existing booking{bookedRanges.length === 1 ? '' : 's'} on this car
+                  </summary>
                   <ul className="booked-ranges-list">
                     {bookedRanges.map((r, i) => (
                       // eslint-disable-next-line react/no-array-index-key
@@ -229,17 +244,45 @@ function BookingModal({ cars }) {
                 {status === 'submitting' ? 'Confirming…' : 'Confirm via WhatsApp'}
               </Button>
               <p className="whatsapp-note">
-                You&rsquo;ll be taken to WhatsApp with your booking pre-filled — just hit send to confirm with
-                our team.
+                You&rsquo;ll be taken to WhatsApp with your booking pre-filled. Your booking stays{' '}
+                <b>pending</b> until you confirm payment below.
               </p>
             </form>
+          ) : status === 'awaiting-payment' ? (
+            <div className="success-state show">
+              <div className="check check-pending">
+                <CheckIcon />
+              </div>
+              <h4>Booking request sent — status: pending</h4>
+              <p>
+                We opened WhatsApp with your booking details. Arrange payment with our team there, then come
+                back and confirm below by uploading your payment receipt.
+              </p>
+
+              {!showReceiptUpload ? (
+                <>
+                  <Button block onClick={() => setShowReceiptUpload(true)}>
+                    Confirm payment
+                  </Button>
+                  <Button variant="outline" block onClick={handleBookAgain}>
+                    Make another booking
+                  </Button>
+                </>
+              ) : (
+                <ReceiptUpload
+                  bookingId={createdBookingId}
+                  onConfirmed={handlePaymentConfirmed}
+                  onCancel={() => setShowReceiptUpload(false)}
+                />
+              )}
+            </div>
           ) : (
             <div className="success-state show">
               <div className="check">
                 <CheckIcon />
               </div>
-              <h4>Almost there!</h4>
-              <p>We opened WhatsApp with your booking details filled in. Send the message and our team will confirm your car shortly.</p>
+              <h4>Booking confirmed!</h4>
+              <p>Your payment receipt has been received and your booking is now confirmed. See you soon!</p>
               <Button variant="outline" block onClick={handleBookAgain}>
                 Make another booking
               </Button>

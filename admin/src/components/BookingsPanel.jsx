@@ -17,6 +17,7 @@ function BookingsPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -46,16 +47,21 @@ function BookingsPanel() {
   }, [token, logout]);
 
   const query = search.trim().toLowerCase();
-  const filtered = query
-    ? bookings.filter(
-        (b) =>
-          b.customerName.toLowerCase().includes(query) ||
-          b.customerPhone.toLowerCase().includes(query) ||
-          b.carName.toLowerCase().includes(query)
-      )
-    : bookings;
+  const filtered = bookings.filter((b) => {
+    if (statusFilter && b.status !== statusFilter) return false;
+    if (!query) return true;
+    return (
+      b.customerName.toLowerCase().includes(query) ||
+      b.customerPhone.toLowerCase().includes(query) ||
+      b.carName.toLowerCase().includes(query)
+    );
+  });
 
-  const totalRevenue = filtered.reduce((sum, b) => sum + b.totalPrice, 0);
+  // Only count confirmed (paid) bookings — a pending booking hasn't
+  // actually been paid for yet, so it shouldn't show as revenue.
+  const confirmedRevenue = filtered
+    .filter((b) => b.status === 'booked')
+    .reduce((sum, b) => sum + b.totalPrice, 0);
 
   return (
     <div className="panel">
@@ -67,8 +73,18 @@ function BookingsPanel() {
           onChange={(e) => setSearch(e.target.value)}
           className="search-input"
         />
+        <select
+          className="filter-select"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          aria-label="Filter by status"
+        >
+          <option value="">All statuses</option>
+          <option value="pending">Pending only</option>
+          <option value="booked">Booked only</option>
+        </select>
         <span className="panel-count">
-          {filtered.length} booking{filtered.length === 1 ? '' : 's'} · RM{totalRevenue} total
+          {filtered.length} booking{filtered.length === 1 ? '' : 's'} · RM{confirmedRevenue} confirmed
         </span>
       </div>
 
@@ -86,6 +102,7 @@ function BookingsPanel() {
           <table className="data-table">
             <thead>
               <tr>
+                <th>Status</th>
                 <th>Car</th>
                 <th>Pick-up</th>
                 <th>Return</th>
@@ -93,12 +110,18 @@ function BookingsPanel() {
                 <th>Total</th>
                 <th>Customer</th>
                 <th>Phone</th>
+                <th>Receipt</th>
                 <th>Booked on</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((b) => (
                 <tr key={b.id}>
+                  <td>
+                    <span className={`status-badge status-${b.status}`}>
+                      {b.status === 'booked' ? 'Booked' : 'Pending'}
+                    </span>
+                  </td>
                   <td>{b.carName}</td>
                   <td>{formatDateTime(b.startAt)}</td>
                   <td>{formatDateTime(b.endAt)}</td>
@@ -107,6 +130,15 @@ function BookingsPanel() {
                   <td>{b.customerName}</td>
                   <td>
                     <a href={`tel:${b.customerPhone}`}>{b.customerPhone}</a>
+                  </td>
+                  <td>
+                    {b.receiptUrl ? (
+                      <a href={b.receiptUrl} target="_blank" rel="noreferrer">
+                        View
+                      </a>
+                    ) : (
+                      <span className="table-muted">—</span>
+                    )}
                   </td>
                   <td className="table-muted">{formatDateTime(b.createdAt)}</td>
                 </tr>

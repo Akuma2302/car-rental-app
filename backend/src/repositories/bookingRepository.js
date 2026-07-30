@@ -8,6 +8,9 @@ function toBookingDto(row) {
     startAt: row.start_at,
     endAt: row.end_at,
     totalPrice: row.total_price,
+    status: row.status,
+    receiptUrl: row.receipt_url,
+    paymentConfirmedAt: row.payment_confirmed_at,
     customerName: row.customer_name,
     customerPhone: row.customer_phone,
     createdAt: row.created_at,
@@ -23,6 +26,11 @@ const bookingRepository = {
        ORDER BY b.start_at DESC`
     );
     return rows.map((row) => ({ ...toBookingDto(row), carName: row.car_name }));
+  },
+
+  async findById(id) {
+    const { rows } = await pool.query('SELECT * FROM bookings WHERE id = $1', [id]);
+    return rows[0] ? toBookingDto(rows[0]) : null;
   },
 
   /**
@@ -57,17 +65,29 @@ const bookingRepository = {
    * EXCLUDE constraint to guarantee atomically that no two bookings for the
    * same car can ever have overlapping ranges — even under concurrent
    * requests. Throws a Postgres error (code 23P01) if the range conflicts;
-   * the service layer translates that into a 409.
+   * the service layer translates that into a 409. Always created "pending"
+   * — see confirmPayment below.
    */
   async create({ carId, startAt, endAt, totalPrice, customerName, customerPhone }) {
     const id = crypto.randomUUID();
     const { rows } = await pool.query(
-      `INSERT INTO bookings (id, car_id, start_at, end_at, total_price, customer_name, customer_phone)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO bookings (id, car_id, start_at, end_at, total_price, customer_name, customer_phone, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending')
        RETURNING *`,
       [id, carId, startAt, endAt, totalPrice, customerName, customerPhone]
     );
     return toBookingDto(rows[0]);
+  },
+
+  async confirmPayment(id, { receiptUrl, receiptStoragePath }) {
+    const { rows } = await pool.query(
+      `UPDATE bookings
+       SET status = 'booked', receipt_url = $2, receipt_storage_path = $3, payment_confirmed_at = now()
+       WHERE id = $1
+       RETURNING *`,
+      [id, receiptUrl, receiptStoragePath]
+    );
+    return rows[0] ? toBookingDto(rows[0]) : null;
   },
 };
 

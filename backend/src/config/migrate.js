@@ -98,6 +98,34 @@ CREATE TABLE IF NOT EXISTS admin_users (
   password_hash TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Payment confirmation flow: a booking starts "pending" the moment the
+-- customer confirms via WhatsApp, and only becomes "booked" once they
+-- upload a payment receipt. Pre-existing bookings (made before this
+-- feature existed) never went through that step — backfill them straight
+-- to "booked" rather than retroactively flagging old, already-settled
+-- bookings as needing payment.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'bookings' AND column_name = 'status'
+  ) THEN
+    ALTER TABLE bookings ADD COLUMN status TEXT NOT NULL DEFAULT 'pending';
+    UPDATE bookings SET status = 'booked';
+  END IF;
+END $$;
+
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS receipt_url TEXT;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS receipt_storage_path TEXT;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_confirmed_at TIMESTAMPTZ;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'bookings_status_check') THEN
+    ALTER TABLE bookings ADD CONSTRAINT bookings_status_check CHECK (status IN ('pending', 'booked'));
+  END IF;
+END $$;
 `;
 
 async function seedCarsIfEmpty() {
