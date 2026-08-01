@@ -99,6 +99,28 @@ const bookingService = {
     const { url, storagePath } = await receiptService.uploadReceipt(bookingId, file);
     return bookingRepository.confirmPayment(bookingId, { receiptUrl: url, receiptStoragePath: storagePath });
   },
+
+  /**
+   * Admin-only. Cancelling frees the car's time range immediately (the
+   * database's exclusion constraint ignores cancelled rows) and the
+   * booking is excluded from revenue everywhere it's calculated. Rejects
+   * if already cancelled, so this can't be "replayed" pointlessly.
+   */
+  async cancelBooking(bookingId) {
+    const booking = await bookingRepository.findById(bookingId);
+    if (!booking) {
+      const err = new Error('Booking not found');
+      err.status = 404;
+      throw err;
+    }
+    if (booking.status === 'cancelled') {
+      const err = new Error('This booking is already cancelled.');
+      err.status = 409;
+      throw err;
+    }
+
+    return bookingRepository.cancel(bookingId);
+  },
 };
 
 module.exports = bookingService;

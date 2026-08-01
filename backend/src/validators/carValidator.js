@@ -50,4 +50,22 @@ function validateCarPayload(body, { isUpdate = false } = {}) {
   return errors;
 }
 
-module.exports = { validateCarPayload };
+const CONDITIONS = ['in_service', 'maintenance', 'broken'];
+
+function validateConditionPayload(body) {
+  const errors = [];
+  if (!CONDITIONS.includes(body.condition)) {
+    errors.push(`condition must be one of: ${CONDITIONS.join(', ')}`);
+  }
+  return errors;
+}
+
+function validateActivePayload(body) {
+  const errors = [];
+  if (typeof body.isActive !== 'boolean') {
+    errors.push('isActive must be true or false');
+  }
+  return errors;
+}
+
+module.exports = { validateCarPayload, validateConditionPayload, validateActivePayload };

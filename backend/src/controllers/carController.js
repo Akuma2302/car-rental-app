@@ -4,7 +4,7 @@ const { validateAvailabilityQuery } = require('../validators/bookingValidator');
 const asyncHandler = require('../utils/asyncHandler');
 
 const getCars = asyncHandler(async (req, res) => {
-  res.json(await carService.listCars());
+  res.json(await carService.listActiveCars());
 });
 
 const getCarById = asyncHandler(async (req, res) => {

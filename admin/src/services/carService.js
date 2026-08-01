@@ -1,7 +1,11 @@
 import { request } from './api.js';
 
-export function fetchCars() {
-  return request('/cars');
+// Admin-only: returns every car, including disabled/maintenance ones, so
+// they stay manageable rather than disappearing once taken off the public
+// site. This is deliberately a different endpoint from the customer
+// frontend's car list, which only shows active cars.
+export function fetchCars(token) {
+  return request('/admin/cars', { token });
 }
 
 export function createCar(token, payload) {
@@ -28,4 +32,12 @@ export function deleteCarImage(token, carId, imageId) {
 
 export function setCoverImage(token, carId, imageId) {
   return request(`/admin/cars/${carId}/images/${imageId}/cover`, { method: 'PUT', token });
+}
+
+export function setCarCondition(token, carId, condition) {
+  return request(`/admin/cars/${carId}/condition`, { method: 'PUT', token, body: JSON.stringify({ condition }) });
+}
+
+export function setCarActive(token, carId, isActive) {
+  return request(`/admin/cars/${carId}/active`, { method: 'PUT', token, body: JSON.stringify({ isActive }) });
 }

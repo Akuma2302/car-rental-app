@@ -310,6 +310,11 @@ code {
   background: var(--jade-light);
   color: var(--jade);
 }
+.status-cancelled {
+  background: rgba(19, 22, 31, 0.08);
+  color: var(--ink-soft);
+  text-decoration: line-through;
+}
 
 .table-wrap {
   overflow-x: auto;
@@ -470,6 +475,51 @@ code {
   text-align: center;
 }
 
+/* Fixed-width actions column so Edit/Delete never wrap or crowd
+   whatever's in the previous column, regardless of its content length. */
+.cars-table .actions-col {
+  width: 170px;
+  white-space: nowrap;
+}
+.cars-table .table-actions {
+  flex-wrap: nowrap;
+}
+.condition-select {
+  min-width: 130px;
+}
+
+.status-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px 6px 8px;
+  border-radius: 100px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.status-toggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.status-toggle-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--coral);
+  flex-shrink: 0;
+}
+.status-toggle-on {
+  border-color: rgba(46, 139, 121, 0.35);
+  color: var(--jade);
+}
+.status-toggle-on .status-toggle-dot {
+  background: var(--jade);
+}
+
 /* ===================== DASHBOARD TAB ===================== */
 .dashboard-panels {
   display: flex;
@@ -502,9 +552,28 @@ code {
 .stat-card-jade .stat-value {
   color: var(--jade);
 }
+.stat-card-coral .stat-value {
+  color: var(--coral);
+}
 .stat-label {
   font-size: 0.78rem;
   color: var(--ink-soft);
+}
+.stat-hint {
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  opacity: 0.75;
+  margin-top: 2px;
+}
+.dash-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+@media (max-width: 760px) {
+  .dash-two-col {
+    grid-template-columns: 1fr;
+  }
 }
 .panel-heading {
   font-size: 1.02rem;
@@ -533,4 +602,10 @@ code {
 }
 .fleet-chip-busy .fleet-chip-dot {
   background: var(--amber);
+}
+.fleet-chip-inactive {
+  opacity: 0.5;
+}
+.fleet-chip-inactive .fleet-chip-dot {
+  background: var(--coral);
 }

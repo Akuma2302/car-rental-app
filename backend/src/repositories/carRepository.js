@@ -13,6 +13,8 @@ function toCarDto(row) {
     pricePerHalfDay: row.price_per_half_day,
     pricePerDay: row.price_per_day,
     accent: row.accent,
+    isActive: row.is_active,
+    condition: row.condition,
   };
 }
 
@@ -39,8 +41,15 @@ async function attachImages(cars) {
 }
 
 const carRepository = {
+  /** Admin-facing: every car regardless of active/condition state. */
   async findAll() {
     const { rows } = await pool.query('SELECT * FROM cars ORDER BY created_at ASC');
+    return attachImages(rows.map(toCarDto));
+  },
+
+  /** Public-facing: only cars currently enabled for the customer site. */
+  async findAllActive() {
+    const { rows } = await pool.query('SELECT * FROM cars WHERE is_active = true ORDER BY created_at ASC');
     return attachImages(rows.map(toCarDto));
   },
 
@@ -97,6 +106,14 @@ const carRepository = {
     if (!rows[0]) return null;
     const [withImages] = await attachImages([toCarDto(rows[0])]);
     return withImages;
+  },
+
+  async setStatus(id, { isActive, condition }) {
+    const { rows } = await pool.query(
+      `UPDATE cars SET is_active = $2, condition = $3 WHERE id = $1 RETURNING *`,
+      [id, isActive, condition]
+    );
+    return rows[0] ? toCarDto(rows[0]) : null;
   },
 
   async remove(id) {

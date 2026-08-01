@@ -28,6 +28,21 @@ ALTER TABLE cars ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT 'Sedan'
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS price_per_hour INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS price_per_half_day INTEGER NOT NULL DEFAULT 0;
 
+-- Enable/disable + condition. A car in maintenance/broken condition is
+-- automatically taken off the public site (is_active forced false) — see
+-- services/carService.js, which is where that rule actually lives; the
+-- database just stores the resulting values.
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS condition TEXT NOT NULL DEFAULT 'in_service';
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'cars_condition_check') THEN
+    ALTER TABLE cars ADD CONSTRAINT cars_condition_check
+      CHECK (condition IN ('in_service', 'maintenance', 'broken'));
+  END IF;
+END $$;
+
 CREATE TABLE IF NOT EXISTS car_images (
   id SERIAL PRIMARY KEY,
   car_id TEXT NOT NULL REFERENCES cars(id) ON DELETE CASCADE,
@@ -78,17 +93,14 @@ END $$;
 ALTER TABLE bookings ALTER COLUMN start_at SET NOT NULL;
 ALTER TABLE bookings ALTER COLUMN end_at SET NOT NULL;
 
--- A real, atomic guarantee that no car is ever double-booked for
--- overlapping time ranges — enforced by Postgres itself, not application
--- code, so it holds even under concurrent requests.
+-- bookings_valid_range: a booking's end must be after its start.
+-- (The overlap-prevention constraint itself is created further down as
+-- bookings_no_overlap_v2, which needs the "cancelled bookings don't hold
+-- their slot" WHERE clause — see that block for why it isn't created here.)
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'bookings_valid_range') THEN
     ALTER TABLE bookings ADD CONSTRAINT bookings_valid_range CHECK (end_at > start_at);
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'bookings_no_overlap') THEN
-    ALTER TABLE bookings ADD CONSTRAINT bookings_no_overlap
-      EXCLUDE USING gist (car_id WITH =, tstzrange(start_at, end_at) WITH &&);
   END IF;
 END $$;
 
@@ -119,11 +131,26 @@ END $$;
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS receipt_url TEXT;
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS receipt_storage_path TEXT;
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_confirmed_at TIMESTAMPTZ;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMPTZ;
 
+-- Versioned constraint names (_v2) so this block only runs once, rather
+-- than dropping and rebuilding the exclusion index on every server start.
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'bookings_status_check') THEN
-    ALTER TABLE bookings ADD CONSTRAINT bookings_status_check CHECK (status IN ('pending', 'booked'));
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'bookings_status_check_v2') THEN
+    ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_status_check;
+    ALTER TABLE bookings ADD CONSTRAINT bookings_status_check_v2
+      CHECK (status IN ('pending', 'booked', 'cancelled'));
+  END IF;
+
+  -- A cancelled booking no longer holds its time range — the exclusion
+  -- constraint only applies to pending/booked rows, so cancelling a
+  -- booking genuinely frees that slot for someone else, atomically.
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'bookings_no_overlap_v2') THEN
+    ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_no_overlap;
+    ALTER TABLE bookings ADD CONSTRAINT bookings_no_overlap_v2
+      EXCLUDE USING gist (car_id WITH =, tstzrange(start_at, end_at) WITH &&)
+      WHERE (status <> 'cancelled');
   END IF;
 END $$;
 `;

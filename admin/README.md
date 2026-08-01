@@ -27,22 +27,28 @@ than one admin login, insert a row into the `admin_users` table directly
 
 ## What it does
 
-- **Dashboard tab:** fleet overview at a glance — total cars, how many are
-  out on rent right now, bookings awaiting payment confirmation, this
-  week's bookings and confirmed revenue, a list of currently-active
-  rentals with when each is due back, and a status chip per car.
+- **Dashboard tab:** fleet status breakdown (rented, available, in
+  maintenance, reserved/upcoming), this week's activity (bookings, awaiting
+  payment, confirmed revenue), performance KPIs over the last 30 days
+  (utilization rate, average daily rate, RevPAC, average idle time between
+  bookings), today's pick-ups and drop-offs, overdue returns, currently-out
+  rentals, and a status chip per car.
 - **Bookings tab:** every booking ever made, newest first, with pick-up/
-  return date-times, duration, status (Pending/Booked), and total price —
-  searchable by customer name, phone, or car, and filterable by status. A
-  "View" link opens the uploaded payment receipt once a customer confirms
-  one. Read-only — bookings aren't editable/cancelable from here yet.
+  return date-times, duration, status (Pending/Booked/Cancelled), and total
+  price — searchable by customer name, phone, or car, filterable by status.
+  A "View" link opens the uploaded payment receipt. A "Cancel" button frees
+  the booking's date range immediately and excludes it from revenue.
 - **Cars tab:** add, edit, or delete cars — including transmission, fuel
   type, category, seats, and three pricing tiers (hourly/half-day/daily).
   Upload up to 8 photos per car (JPEG/PNG/WebP, 8MB each) and pick which one
   is the cover photo; more than one photo automatically becomes a carousel
-  on the public site. Changes show up there immediately (both apps read
-  from the same tables). Photo uploads need Supabase Storage configured on
-  the backend first — see `backend/SUPABASE_SETUP.md`.
+  on the public site. Each car also has a **Listed/Hidden** toggle and a
+  **condition** dropdown (In service/Maintenance/Broken) — marking a car
+  Maintenance or Broken automatically hides it from the public site and
+  locks the toggle until it's back In service. Changes show up on the
+  public site immediately (both apps read from the same tables). Photo
+  uploads need Supabase Storage configured on the backend first — see
+  `backend/SUPABASE_SETUP.md`.
 
 ## How auth works
 

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { fetchAdminBookings } from '../services/bookingService.js';
+import { fetchAdminBookings, cancelBooking } from '../services/bookingService.js';
 import { formatDateTime } from '../utils/date.js';
+
+const STATUS_LABELS = { pending: 'Pending', booked: 'Booked', cancelled: 'Cancelled' };
 
 function durationLabel(startAt, endAt) {
   const hours = (new Date(endAt) - new Date(startAt)) / (1000 * 60 * 60);
@@ -16,21 +18,22 @@ function BookingsPanel() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [actionError, setActionError] = useState('');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
-    let cancelled = false;
+    let cancelledRequest = false;
     // Standard fetch-on-mount pattern (react.dev/learn/synchronizing-with-effects).
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
 
     fetchAdminBookings(token)
       .then((data) => {
-        if (!cancelled) setBookings(data);
+        if (!cancelledRequest) setBookings(data);
       })
       .catch((err) => {
-        if (cancelled) return;
+        if (cancelledRequest) return;
         if (err.status === 401) {
           logout();
           return;
@@ -38,13 +41,27 @@ function BookingsPanel() {
         setError(err.message || 'Failed to load bookings');
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelledRequest) setLoading(false);
       });
 
     return () => {
-      cancelled = true;
+      cancelledRequest = true;
     };
   }, [token, logout]);
+
+  async function handleCancel(booking) {
+    if (!window.confirm(`Cancel this booking for ${booking.customerName}? The date will become available again.`)) {
+      return;
+    }
+    setActionError('');
+    try {
+      const updated = await cancelBooking(token, booking.id);
+      setBookings((prev) => prev.map((b) => (b.id === booking.id ? { ...b, ...updated } : b)));
+    } catch (err) {
+      if (err.status === 401) return logout();
+      setActionError(err.message || 'Could not cancel booking');
+    }
+  }
 
   const query = search.trim().toLowerCase();
   const filtered = bookings.filter((b) => {
@@ -57,8 +74,8 @@ function BookingsPanel() {
     );
   });
 
-  // Only count confirmed (paid) bookings — a pending booking hasn't
-  // actually been paid for yet, so it shouldn't show as revenue.
+  // Only count confirmed (paid), non-cancelled bookings — pending hasn't
+  // been paid yet, and cancelled shouldn't count as revenue at all.
   const confirmedRevenue = filtered
     .filter((b) => b.status === 'booked')
     .reduce((sum, b) => sum + b.totalPrice, 0);
@@ -82,11 +99,14 @@ function BookingsPanel() {
           <option value="">All statuses</option>
           <option value="pending">Pending only</option>
           <option value="booked">Booked only</option>
+          <option value="cancelled">Cancelled only</option>
         </select>
         <span className="panel-count">
           {filtered.length} booking{filtered.length === 1 ? '' : 's'} · RM{confirmedRevenue} confirmed
         </span>
       </div>
+
+      {actionError && <p className="form-error">{actionError}</p>}
 
       {loading && <p className="state-message">Loading bookings…</p>}
       {error && <p className="state-message state-error">{error}</p>}
@@ -112,15 +132,14 @@ function BookingsPanel() {
                 <th>Phone</th>
                 <th>Receipt</th>
                 <th>Booked on</th>
+                <th aria-label="Actions" />
               </tr>
             </thead>
             <tbody>
               {filtered.map((b) => (
                 <tr key={b.id}>
                   <td>
-                    <span className={`status-badge status-${b.status}`}>
-                      {b.status === 'booked' ? 'Booked' : 'Pending'}
-                    </span>
+                    <span className={`status-badge status-${b.status}`}>{STATUS_LABELS[b.status]}</span>
                   </td>
                   <td>{b.carName}</td>
                   <td>{formatDateTime(b.startAt)}</td>
@@ -141,6 +160,13 @@ function BookingsPanel() {
                     )}
                   </td>
                   <td className="table-muted">{formatDateTime(b.createdAt)}</td>
+                  <td>
+                    {b.status !== 'cancelled' && (
+                      <button className="btn btn-outline btn-sm btn-danger" onClick={() => handleCancel(b)}>
+                        Cancel
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

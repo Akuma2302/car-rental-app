@@ -3,13 +3,17 @@ const requireAdmin = require('../middlewares/requireAdmin');
 const upload = require('../middlewares/upload');
 const {
   listBookings,
+  listAllCarsForAdmin,
   getDashboardOverview,
   createCar,
   updateCar,
   deleteCar,
+  setCarCondition,
+  setCarActive,
   uploadCarImages,
   deleteCarImage,
   setCoverImage,
+  cancelBooking,
 } = require('../controllers/adminController');
 
 const router = express.Router();
@@ -18,11 +22,16 @@ const router = express.Router();
 router.use(requireAdmin);
 
 router.get('/bookings', listBookings);
+router.put('/bookings/:bookingId/cancel', cancelBooking);
+
 router.get('/dashboard', getDashboardOverview);
 
+router.get('/cars', listAllCarsForAdmin);
 router.post('/cars', createCar);
 router.put('/cars/:carId', updateCar);
 router.delete('/cars/:carId', deleteCar);
+router.put('/cars/:carId/condition', setCarCondition);
+router.put('/cars/:carId/active', setCarActive);
 
 router.post('/cars/:carId/images', upload.array('images', 8), uploadCarImages);
 router.delete('/cars/:carId/images/:imageId', deleteCarImage);

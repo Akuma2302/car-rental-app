@@ -1,7 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { fetchCars, createCar, updateCar, deleteCar } from '../services/carService.js';
+import {
+  fetchCars,
+  createCar,
+  updateCar,
+  deleteCar,
+  setCarCondition,
+  setCarActive,
+} from '../services/carService.js';
 import CarForm from './CarForm.jsx';
+
+const CONDITIONS = [
+  { value: 'in_service', label: 'In service' },
+  { value: 'maintenance', label: 'Maintenance' },
+  { value: 'broken', label: 'Broken' },
+];
 
 function CarsPanel() {
   const { token, logout } = useAuth();
@@ -13,15 +26,18 @@ function CarsPanel() {
 
   function load() {
     setLoading(true);
-    fetchCars()
+    fetchCars(token)
       .then(setCars)
-      .catch((err) => setError(err.message || 'Failed to load cars'))
+      .catch((err) => {
+        if (err.status === 401) return logout();
+        setError(err.message || 'Failed to load cars');
+      })
       .finally(() => setLoading(false));
   }
 
   // Same standard fetch-on-mount pattern noted in BookingsPanel.jsx.
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(load, []);
+  useEffect(load, [token, logout]);
 
   async function handleSave(payload) {
     setActionError('');
@@ -49,6 +65,28 @@ function CarsPanel() {
     } catch (err) {
       if (err.status === 401) return logout();
       setActionError(err.message || 'Could not delete car');
+    }
+  }
+
+  async function handleConditionChange(car, condition) {
+    setActionError('');
+    try {
+      const updated = await setCarCondition(token, car.id, condition);
+      setCars((prev) => prev.map((c) => (c.id === car.id ? { ...c, ...updated } : c)));
+    } catch (err) {
+      if (err.status === 401) return logout();
+      setActionError(err.message || 'Could not update condition');
+    }
+  }
+
+  async function handleToggleActive(car) {
+    setActionError('');
+    try {
+      const updated = await setCarActive(token, car.id, !car.isActive);
+      setCars((prev) => prev.map((c) => (c.id === car.id ? { ...c, ...updated } : c)));
+    } catch (err) {
+      if (err.status === 401) return logout();
+      setActionError(err.message || 'Could not update status');
     }
   }
 
@@ -83,7 +121,7 @@ function CarsPanel() {
 
       {!loading && !error && (
         <div className="table-wrap">
-          <table className="data-table">
+          <table className="data-table cars-table">
             <thead>
               <tr>
                 <th>Photo</th>
@@ -92,12 +130,15 @@ function CarsPanel() {
                 <th>Fuel</th>
                 <th>Seats</th>
                 <th>Pricing</th>
-                <th aria-label="Actions" />
+                <th>Listed</th>
+                <th>Condition</th>
+                <th className="actions-col" aria-label="Actions" />
               </tr>
             </thead>
             <tbody>
               {cars.map((car) => {
                 const cover = car.images?.[0];
+                const canToggle = car.condition === 'in_service';
                 return (
                   <tr key={car.id}>
                     <td>
@@ -117,7 +158,38 @@ function CarsPanel() {
                     <td className="table-muted">
                       RM{car.pricePerHour}/hr · RM{car.pricePerHalfDay}/half · RM{car.pricePerDay}/day
                     </td>
-                    <td className="table-actions">
+                    <td>
+                      <button
+                        type="button"
+                        className={`status-toggle${car.isActive ? ' status-toggle-on' : ''}`}
+                        onClick={() => handleToggleActive(car)}
+                        disabled={!canToggle}
+                        title={
+                          canToggle
+                            ? car.isActive
+                              ? 'Visible on the public site — click to hide'
+                              : 'Hidden from the public site — click to list'
+                            : 'Set condition to "In service" to change this'
+                        }
+                      >
+                        <span className="status-toggle-dot" />
+                        {car.isActive ? 'Listed' : 'Hidden'}
+                      </button>
+                    </td>
+                    <td>
+                      <select
+                        className="filter-select condition-select"
+                        value={car.condition}
+                        onChange={(e) => handleConditionChange(car, e.target.value)}
+                      >
+                        {CONDITIONS.map((c) => (
+                          <option key={c.value} value={c.value}>
+                            {c.label}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="table-actions actions-col">
                       <button className="btn btn-outline btn-sm" onClick={() => setEditingCar(car)}>
                         Edit
                       </button>

@@ -1,0 +1,14 @@
+addition for admin
+
+for the dashboard add on:
+1. Fleet Status & Availability (Operations)Total Fleet Size: Total vehicles owned/managed.Live Status Breakdown:Rented / On Road (Active rentals)Available (Ready for immediate pick-up)In Maintenance / Repair (Out of service)  Reserved / Upcoming (Booked for today/near future)Today's Pickups & Drop-offs: Actionable list of scheduled collections, returns, and overdue vehicles.
+
+2. Rental Performance & Utilization (KPIs)Utilization Rate (%): The percentage of your total fleet currently rented out. (Formula: Days Rented ÷ Total Available Vehicle Days)Average Daily Rate (ADR): Average revenue generated per vehicle per day.  RevPAC (Revenue Per Available Car): Total rental revenue divided by total fleet size (helps measure overall asset efficiency).Turnover / Idle Time: How long vehicles sit unrented between bookings.
+
+
+for the car
+fix the UI at the edit and delete part
+
+other thing for admin system, all the car admin can disable or enable. so if disable it will not appear at the user page. beside it either it is "in service/in maintainance/broken(choose proper word)". if it is in maintainance or broken it will automatically disable
+
+or the booking page, admin can cancel booking, so the booked that had been cancel, we will not calculate the revenue and the date will stay avaialble

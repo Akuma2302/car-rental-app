@@ -99,7 +99,7 @@ Storage. One-time setup:
    bucket**
 2. Name it `car-images` (or anything — just match `STORAGE_BUCKET` in
    `.env` if you pick something else)
-3.   **Public bucket** ON — image URLs need to load directly in
+3. Toggle **Public bucket** ON — image URLs need to load directly in
    `<img>` tags without authentication
 4. That's it — no RLS policies to configure. The backend uploads using your
    **service role key**, which bypasses Storage's access policies entirely

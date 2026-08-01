@@ -97,14 +97,18 @@ The API starts on **http://localhost:4000** (change with `PORT`).
 
 | Method | Path | Purpose |
 |---|---|---|
+| GET | `/api/admin/cars` | Every car, including disabled/maintenance ones |
 | GET | `/api/admin/bookings` | Every booking ever made, with car name joined in |
-| GET | `/api/admin/dashboard` | Fleet overview — counts, currently-active rentals, this-week revenue |
+| GET | `/api/admin/dashboard` | Fleet overview, today's schedule, and performance KPIs |
 | POST | `/api/admin/cars` | Create a car |
 | PUT | `/api/admin/cars/:carId` | Update a car |
 | DELETE | `/api/admin/cars/:carId` | Delete a car (cascades to its bookings/images) |
+| PUT | `/api/admin/cars/:carId/condition` | Set condition — `in_service`/`maintenance`/`broken` (auto enables/disables the car) |
+| PUT | `/api/admin/cars/:carId/active` | Manually enable/disable a car — blocked while condition isn't `in_service` |
 | POST | `/api/admin/cars/:carId/images` | Upload 1–8 images (multipart, field name `images`) |
 | DELETE | `/api/admin/cars/:carId/images/:imageId` | Delete one image |
 | PUT | `/api/admin/cars/:carId/images/:imageId/cover` | Make an image the cover photo |
+| PUT | `/api/admin/bookings/:bookingId/cancel` | Cancel a booking — frees its time range immediately |
 
 `POST /api/bookings` body:
 ```json
@@ -122,6 +126,33 @@ range overlaps an existing booking — enforced by a real Postgres `EXCLUDE`
 constraint over the date range, not just an application check, so this
 holds true even under concurrent requests and for arbitrary-length rentals
 (hours to weeks), not just fixed slots.
+
+## Car availability, condition, and cancellation
+
+**Enable/disable + condition.** Every car has `isActive` (shown on the
+public site or not) and `condition` (`in_service` / `maintenance` /
+`broken`). The rule lives in `src/services/carService.js`:
+- Setting condition to `maintenance` or `broken` automatically sets
+  `isActive` to false — a car marked broken shouldn't be one manual step
+  away from still being bookable.
+- Setting condition back to `in_service` automatically sets `isActive`
+  back to true, so it isn't left "back in service" but still hidden.
+- The direct enable/disable toggle (`PUT /api/admin/cars/:carId/active`)
+  only works while condition is `in_service` — you can't manually
+  re-enable a car the business marked unsafe; clear its condition first.
+
+`GET /api/cars` (public) only returns active cars. `GET /api/admin/cars`
+(admin) returns everything, including disabled ones — otherwise a car
+would vanish from the admin's own management screen the moment it needed
+maintenance, which would make it unmanageable.
+
+**Cancelling a booking** (`PUT /api/admin/bookings/:bookingId/cancel`,
+admin-only) sets its status to `cancelled`. This isn't just a label change
+— the database's exclusion constraint (`bookings_no_overlap_v2`) has a
+`WHERE status <> 'cancelled'` clause, so a cancelled booking's time range
+is immediately, atomically available to be booked by someone else again.
+Cancelled bookings are also excluded from every revenue calculation, same
+as pending ones.
 
 ## Payment confirmation flow
 
@@ -195,3 +226,7 @@ assuming a fresh install. This runs automatically on every server start.
 - Deleting a car cascades to delete its bookings and image records (not
   just orphan them) — intentional for a small fleet, but worth knowing
   before deleting a car with booking history you want to keep.
+- The dashboard's KPIs (utilization, ADR, RevPAC) use a fixed rolling
+  30-day window, and "today's schedule" uses server-local day boundaries —
+  both inherit the same timezone caveat noted above for `OPEN_HOUR`/
+  `CLOSE_HOUR`.

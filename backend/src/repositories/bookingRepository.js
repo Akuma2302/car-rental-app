@@ -11,6 +11,7 @@ function toBookingDto(row) {
     status: row.status,
     receiptUrl: row.receipt_url,
     paymentConfirmedAt: row.payment_confirmed_at,
+    cancelledAt: row.cancelled_at,
     customerName: row.customer_name,
     customerPhone: row.customer_phone,
     createdAt: row.created_at,
@@ -35,38 +36,39 @@ const bookingRepository = {
 
   /**
    * Booked ranges for a car within a window — used by the customer site to
-   * show which dates/times are already taken. Returns start/end only, no
-   * customer PII (this is a public endpoint).
+   * show which dates/times are already taken. Cancelled bookings are
+   * excluded since they no longer hold their slot. No customer PII (this
+   * is a public endpoint).
    */
   async findRangesForCar(carId, fromDate, toDate) {
     const { rows } = await pool.query(
       `SELECT start_at, end_at FROM bookings
-       WHERE car_id = $1 AND start_at < $3 AND end_at > $2
+       WHERE car_id = $1 AND status <> 'cancelled' AND start_at < $3 AND end_at > $2
        ORDER BY start_at ASC`,
       [carId, fromDate, toDate]
     );
     return rows.map((r) => ({ startAt: r.start_at, endAt: r.end_at }));
   },
 
-  /** Bookings currently in progress (right now falls within their range) — for the admin dashboard. */
+  /** Non-cancelled bookings currently in progress (right now falls within their range) — for the admin dashboard. */
   async findActiveNow() {
     const { rows } = await pool.query(
       `SELECT b.*, c.name AS car_name
        FROM bookings b
        JOIN cars c ON c.id = b.car_id
-       WHERE now() BETWEEN b.start_at AND b.end_at
+       WHERE b.status <> 'cancelled' AND now() BETWEEN b.start_at AND b.end_at
        ORDER BY b.end_at ASC`
     );
     return rows.map((row) => ({ ...toBookingDto(row), carName: row.car_name }));
   },
 
   /**
-   * Inserts the booking directly and relies on the bookings_no_overlap
-   * EXCLUDE constraint to guarantee atomically that no two bookings for the
-   * same car can ever have overlapping ranges — even under concurrent
-   * requests. Throws a Postgres error (code 23P01) if the range conflicts;
-   * the service layer translates that into a 409. Always created "pending"
-   * — see confirmPayment below.
+   * Inserts the booking directly and relies on the bookings_no_overlap_v2
+   * EXCLUDE constraint to guarantee atomically that no two active (not
+   * cancelled) bookings for the same car can ever overlap — even under
+   * concurrent requests. Throws a Postgres error (code 23P01) if the range
+   * conflicts; the service layer translates that into a 409. Always
+   * created "pending" — see confirmPayment below.
    */
   async create({ carId, startAt, endAt, totalPrice, customerName, customerPhone }) {
     const id = crypto.randomUUID();
@@ -86,6 +88,17 @@ const bookingRepository = {
        WHERE id = $1
        RETURNING *`,
       [id, receiptUrl, receiptStoragePath]
+    );
+    return rows[0] ? toBookingDto(rows[0]) : null;
+  },
+
+  /** Cancelling frees the car's time range immediately (the exclusion
+   * constraint only applies to non-cancelled rows) and is excluded from
+   * revenue everywhere it's calculated. */
+  async cancel(id) {
+    const { rows } = await pool.query(
+      `UPDATE bookings SET status = 'cancelled', cancelled_at = now() WHERE id = $1 RETURNING *`,
+      [id]
     );
     return rows[0] ? toBookingDto(rows[0]) : null;
   },
