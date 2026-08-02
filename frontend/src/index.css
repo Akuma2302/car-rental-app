@@ -913,6 +913,22 @@ h3 {
   text-align: center;
 }
 
+.existing-pending-prompt {
+  background: rgba(242, 169, 59, 0.14);
+  border: 1px solid rgba(242, 169, 59, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+}
+.existing-pending-prompt p {
+  font-size: 0.86rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+
 .success-state {
   text-align: center;
   padding: 6px 0 4px;

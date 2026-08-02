@@ -177,6 +177,13 @@ upload a receipt (same as `confirm-payment` above) or cancel outright via
 still `pending`; once payment is confirmed, cancelling needs a human via
 the admin app, not a public endpoint.
 
+There's a third path too, for the most common trip-up: if someone tries to
+book the *same* car again while their own earlier booking on it is still
+pending, they'd otherwise just hit a confusing overlap error. The frontend
+recognizes this locally (same car ID as the one already remembered) and
+offers a "Confirm booking" shortcut straight to their existing pending
+booking instead of a dead-end error.
+
 ## Payment confirmation flow
 
 A booking is never immediately "final." It starts `pending` the instant a

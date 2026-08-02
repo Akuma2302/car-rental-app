@@ -5,7 +5,7 @@ import { usePriceQuote } from '../../hooks/usePriceQuote.js';
 import { createBooking, fetchBookingStatus, cancelOwnBooking } from '../../services/bookingService.js';
 import { todayStr, maxDateStr, combineDateTime, formatRangeShort, defaultReturn } from '../../utils/date.js';
 import { findConflict } from '../../utils/rangeOverlap.js';
-import { savePendingBooking, clearPendingBooking } from '../../utils/pendingBooking.js';
+import { savePendingBooking, clearPendingBooking, readPendingBooking } from '../../utils/pendingBooking.js';
 import { siteConfig } from '../../utils/siteConfig.js';
 import Button from '../../components/Button.jsx';
 import { CloseIcon, CheckIcon } from '../../components/icons.jsx';
@@ -22,7 +22,7 @@ function defaultPickupTime() {
 //                     \-> error (booking creation failed)
 // loading-resume -> awaiting-payment | confirmed | cancelled  (reopening an existing booking)
 function BookingModal({ cars }) {
-  const { activeCarId, resumeBookingId, isOpen, closeBooking } = useBookingContext();
+  const { activeCarId, resumeBookingId, isOpen, closeBooking, resumeBooking } = useBookingContext();
   const car = cars.find((c) => c.id === activeCarId) || null;
 
   const [pickupDate, setPickupDate] = useState(todayStr());
@@ -128,6 +128,19 @@ function BookingModal({ cars }) {
   if (!isOpen || !car) return null;
 
   const canSubmit = validRange && !conflict && name.trim() && phone.trim() && status !== 'submitting';
+
+  // If this browser already has a pending booking for this exact car (most
+  // often: they started a booking, left before confirming payment, and are
+  // now trying again), point them back at it instead of letting them get
+  // stuck on an unexplained overlap error against their own booking.
+  const existingPendingForThisCar = (() => {
+    const stored = readPendingBooking();
+    return stored && stored.carId === car.id ? stored : null;
+  })();
+
+  function handleGoToPendingBooking() {
+    resumeBooking(car.id, existingPendingForThisCar.bookingId);
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -301,6 +314,15 @@ function BookingModal({ cars }) {
                 You&rsquo;ll be taken to WhatsApp with your booking pre-filled. Your booking stays{' '}
                 <b>pending</b> until you confirm payment below.
               </p>
+
+              {existingPendingForThisCar && (
+                <div className="existing-pending-prompt">
+                  <p>You already have a pending booking on this car.</p>
+                  <Button type="button" variant="outline" block onClick={handleGoToPendingBooking}>
+                    Confirm booking
+                  </Button>
+                </div>
+              )}
             </form>
           ) : status === 'awaiting-payment' ? (
             <div className="success-state show">
