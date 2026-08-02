@@ -12,6 +12,10 @@ const env = {
   closeHour: parseInt(process.env.CLOSE_HOUR || '22', 10),
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   adminCorsOrigin: process.env.ADMIN_CORS_ORIGIN || 'http://localhost:5174',
+  // Used to build the "resume your booking" link included in the WhatsApp
+  // message — lets a customer get back to the confirm-payment/cancel
+  // screen even if they closed the tab before finishing.
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   databaseUrl: process.env.DATABASE_URL || '',
   jwtSecret: process.env.JWT_SECRET || '',
   // Bootstrap credentials — used once, to create the first admin account if

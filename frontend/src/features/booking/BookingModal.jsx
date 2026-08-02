@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { useBookingContext } from '../../context/BookingContext.jsx';
 import { useBookedRanges } from '../../hooks/useBookedRanges.js';
 import { usePriceQuote } from '../../hooks/usePriceQuote.js';
-import { createBooking } from '../../services/bookingService.js';
+import { createBooking, fetchBookingStatus, cancelOwnBooking } from '../../services/bookingService.js';
 import { todayStr, maxDateStr, combineDateTime, formatRangeShort, defaultReturn } from '../../utils/date.js';
 import { findConflict } from '../../utils/rangeOverlap.js';
+import { savePendingBooking, clearPendingBooking } from '../../utils/pendingBooking.js';
 import { siteConfig } from '../../utils/siteConfig.js';
 import Button from '../../components/Button.jsx';
 import { CloseIcon, CheckIcon } from '../../components/icons.jsx';
@@ -17,9 +18,11 @@ function defaultPickupTime() {
 }
 
 // idle -> submitting -> awaiting-payment -> confirmed
+//                     \-> cancelling -> cancelled
 //                     \-> error (booking creation failed)
+// loading-resume -> awaiting-payment | confirmed | cancelled  (reopening an existing booking)
 function BookingModal({ cars }) {
-  const { activeCarId, isOpen, closeBooking } = useBookingContext();
+  const { activeCarId, resumeBookingId, isOpen, closeBooking } = useBookingContext();
   const car = cars.find((c) => c.id === activeCarId) || null;
 
   const [pickupDate, setPickupDate] = useState(todayStr());
@@ -32,6 +35,7 @@ function BookingModal({ cars }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [createdBookingId, setCreatedBookingId] = useState(null);
   const [showReceiptUpload, setShowReceiptUpload] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   const { ranges: bookedRanges, reload: reloadRanges } = useBookedRanges(
     isOpen ? activeCarId : null,
@@ -45,26 +49,55 @@ function BookingModal({ cars }) {
   const conflict = findConflict(startAt, endAt, bookedRanges);
   const validRange = startAt && endAt && new Date(endAt) > new Date(startAt);
 
-  // Reset the form fresh every time a (new) car is opened.
+  // Fresh booking vs. resuming an existing pending one — reset (or load)
+  // fresh every time the modal opens for a (possibly new) car.
   useEffect(() => {
-    if (isOpen) {
-      const pDate = todayStr();
-      const pTime = defaultPickupTime();
-      // Standard fetch/reset-on-mount pattern (react.dev/learn/synchronizing-with-effects).
+    if (!isOpen) return undefined;
+
+    if (resumeBookingId) {
+      let cancelled = false;
+      // Standard fetch-on-mount pattern (react.dev/learn/synchronizing-with-effects).
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setPickupDate(pDate);
-      setPickupTime(pTime);
-      const ret = defaultReturn(pDate, pTime);
-      setReturnDate(ret.date);
-      setReturnTime(ret.time);
-      setName('');
-      setPhone('');
-      setStatus('idle');
+      setStatus('loading-resume');
       setErrorMessage('');
-      setCreatedBookingId(null);
+      setCreatedBookingId(resumeBookingId);
       setShowReceiptUpload(false);
+
+      fetchBookingStatus(resumeBookingId)
+        .then((booking) => {
+          if (cancelled) return;
+          if (booking.status === 'booked') setStatus('confirmed');
+          else if (booking.status === 'cancelled') setStatus('cancelled');
+          else setStatus('awaiting-payment');
+        })
+        .catch((err) => {
+          if (cancelled) return;
+          setStatus('error');
+          setErrorMessage(err.message || "Couldn't load that booking. Please try again.");
+        });
+
+      return () => {
+        cancelled = true;
+      };
     }
-  }, [activeCarId, isOpen]);
+
+    const pDate = todayStr();
+    const pTime = defaultPickupTime();
+    // Standard fetch/reset-on-mount pattern (react.dev/learn/synchronizing-with-effects).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPickupDate(pDate);
+    setPickupTime(pTime);
+    const ret = defaultReturn(pDate, pTime);
+    setReturnDate(ret.date);
+    setReturnTime(ret.time);
+    setName('');
+    setPhone('');
+    setStatus('idle');
+    setErrorMessage('');
+    setCreatedBookingId(null);
+    setShowReceiptUpload(false);
+    return undefined;
+  }, [activeCarId, resumeBookingId, isOpen]);
 
   // Keep the return date roughly a day ahead when the pickup date changes,
   // so the fields don't silently produce an invalid (end before start) range.
@@ -113,6 +146,7 @@ function BookingModal({ cars }) {
       });
       window.open(result.whatsappUrl, '_blank');
       setCreatedBookingId(result.booking.id);
+      savePendingBooking(result.booking.id, car.id);
       setStatus('awaiting-payment');
     } catch (err) {
       setStatus('error');
@@ -124,8 +158,26 @@ function BookingModal({ cars }) {
   }
 
   function handlePaymentConfirmed() {
+    clearPendingBooking();
     setStatus('confirmed');
     setShowReceiptUpload(false);
+  }
+
+  async function handleCancelBooking() {
+    if (!createdBookingId) return;
+    if (!window.confirm("Cancel this booking? You'll need to start over if you change your mind.")) return;
+
+    setCancelling(true);
+    setErrorMessage('');
+    try {
+      await cancelOwnBooking(createdBookingId);
+      clearPendingBooking();
+      setStatus('cancelled');
+    } catch (err) {
+      setErrorMessage(err.message || 'Could not cancel this booking. Please try again.');
+    } finally {
+      setCancelling(false);
+    }
   }
 
   function handleBookAgain() {
@@ -156,7 +208,9 @@ function BookingModal({ cars }) {
         </div>
 
         <div className="modal-body">
-          {status === 'idle' || status === 'submitting' || status === 'error' ? (
+          {status === 'loading-resume' ? (
+            <p className="state-message">Loading your booking…</p>
+          ) : status === 'idle' || status === 'submitting' || status === 'error' ? (
             <form className="booking-form" onSubmit={handleSubmit}>
               <DateTimeField
                 label="Pick-up"
@@ -256,16 +310,19 @@ function BookingModal({ cars }) {
               <h4>Booking request sent — status: pending</h4>
               <p>
                 We opened WhatsApp with your booking details. Arrange payment with our team there, then come
-                back and confirm below by uploading your payment receipt.
+                back and confirm below by uploading your payment receipt. Changed your mind? You can cancel
+                this booking instead.
               </p>
+
+              {errorMessage && <p className="form-error">{errorMessage}</p>}
 
               {!showReceiptUpload ? (
                 <>
                   <Button block onClick={() => setShowReceiptUpload(true)}>
                     Confirm payment
                   </Button>
-                  <Button variant="outline" block onClick={handleBookAgain}>
-                    Make another booking
+                  <Button variant="outline" block onClick={handleCancelBooking} disabled={cancelling}>
+                    {cancelling ? 'Cancelling…' : 'Cancel this booking'}
                   </Button>
                 </>
               ) : (
@@ -275,6 +332,17 @@ function BookingModal({ cars }) {
                   onCancel={() => setShowReceiptUpload(false)}
                 />
               )}
+            </div>
+          ) : status === 'cancelled' ? (
+            <div className="success-state show">
+              <div className="check check-cancelled">
+                <CloseIcon />
+              </div>
+              <h4>Booking cancelled</h4>
+              <p>This booking has been cancelled and the date is available again.</p>
+              <Button block onClick={handleBookAgain}>
+                Make a new booking
+              </Button>
             </div>
           ) : (
             <div className="success-state show">

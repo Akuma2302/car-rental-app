@@ -75,6 +75,11 @@ of failing silently if they can't reach it.
 6. **The booking is visible in the admin dashboard the whole time** — as
    soon as it's created (marked "Pending"), and updates live once payment
    is confirmed (marked "Booked", with a link to view the receipt).
+7. If the customer closes the tab before finishing step 5, they're not
+   stuck — the WhatsApp message includes a link straight back to that
+   booking, and the site also remembers it locally so a banner offers to
+   resume it on their next visit. From there they can either finish
+   confirming payment or cancel the booking themselves.
 
 ## What to edit for your business
 

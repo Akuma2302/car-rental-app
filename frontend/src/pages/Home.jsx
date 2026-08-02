@@ -5,6 +5,7 @@ import Hero from '../components/Hero.jsx';
 import CarsSection from '../components/CarsSection.jsx';
 import UspSection from '../components/UspSection.jsx';
 import LocationSection from '../components/LocationSection.jsx';
+import PendingBookingBanner from '../components/PendingBookingBanner.jsx';
 import BookingModal from '../features/booking/BookingModal.jsx';
 import { useCars } from '../hooks/useCars.js';
 
@@ -38,6 +39,7 @@ function Home() {
 
   return (
     <>
+      <PendingBookingBanner />
       <Header />
       <Hero />
       <CarsSection cars={cars} loading={loading} error={error} />

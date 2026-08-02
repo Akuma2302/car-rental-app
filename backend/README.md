@@ -74,6 +74,7 @@ The API starts on **http://localhost:4000** (change with `PORT`).
 | `OPEN_HOUR` / `CLOSE_HOUR` | Daily operating hours (24h) | `7` / `22` |
 | `CORS_ORIGIN` | Customer frontend's origin | `http://localhost:5173` |
 | `ADMIN_CORS_ORIGIN` | Admin app's origin | `http://localhost:5174` |
+| `FRONTEND_URL` | Customer frontend's URL — used to build the "resume your booking" link sent via WhatsApp | `http://localhost:5173` |
 | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | For vehicle image uploads — see `SUPABASE_SETUP.md` | *(required for image uploads only)* |
 | `STORAGE_BUCKET` | Supabase Storage bucket name for images | `car-images` |
 | `HALF_DAY_THRESHOLD_HOURS` / `FULL_DAY_THRESHOLD_HOURS` | Pricing tier cutoffs, in hours | `12` / `24` |
@@ -89,7 +90,9 @@ The API starts on **http://localhost:4000** (change with `PORT`).
 | GET | `/api/cars/:carId/booked-ranges?from=...&to=...` | Already-booked date/time ranges (no customer info) |
 | GET | `/api/cars/:carId/price-quote?startAt=...&endAt=...` | Live price + duration for a proposed booking |
 | POST | `/api/bookings` | Create a booking (always starts `pending`) → `{ booking, whatsappUrl }` |
+| GET | `/api/bookings/:bookingId` | Look up a booking's current status (used by the resume flow) |
 | POST | `/api/bookings/:bookingId/confirm-payment` | Upload a receipt (multipart, field `receipt`) → flips the booking to `booked` |
+| POST | `/api/bookings/:bookingId/cancel` | Customer self-cancel — only works while still `pending` |
 | POST | `/api/auth/login` | Admin login → `{ token, username }` |
 | GET | `/api/health` | Health check |
 
@@ -154,6 +157,26 @@ is immediately, atomically available to be booked by someone else again.
 Cancelled bookings are also excluded from every revenue calculation, same
 as pending ones.
 
+## Recovering a pending booking
+
+If a customer closes the tab before confirming payment, nothing is lost —
+the booking stays `pending` and there are two ways back to it:
+- The WhatsApp message includes a link
+  (`{FRONTEND_URL}/?booking={id}`) straight back to that booking's
+  confirm-payment/cancel screen.
+- The frontend also remembers the booking locally (`localStorage`), so
+  simply returning to the site later shows a small banner offering to
+  resume it — this works even without the link, as long as it's the same
+  browser.
+
+Both paths use `GET /api/bookings/:bookingId` to check the booking's
+current status (in case it was already confirmed or cancelled elsewhere)
+before deciding what to show. From that screen the customer can either
+upload a receipt (same as `confirm-payment` above) or cancel outright via
+`POST /api/bookings/:bookingId/cancel` — deliberately only permitted while
+still `pending`; once payment is confirmed, cancelling needs a human via
+the admin app, not a public endpoint.
+
 ## Payment confirmation flow
 
 A booking is never immediately "final." It starts `pending` the instant a
@@ -172,12 +195,14 @@ already confirmed, so it can't be replayed or misused even if a receipt URL
 somehow leaked. Receipts upload to the same Supabase Storage bucket as car
 images, under a separate `receipts/` path.
 
-**Worth knowing:** a `pending` booking still holds its time range — the
-database's overlap constraint doesn't distinguish `pending` from `booked`,
-so an unpaid pending booking currently blocks that slot indefinitely rather
-than expiring automatically. Fine at small scale where a human is watching
-WhatsApp anyway; if no-shows start tying up the calendar, adding an
-expiry/cleanup job for old unpaid pending bookings would be the next step.
+**Worth knowing:** a `pending` booking still holds its time range for as
+long as it stays pending, and there's still no *automatic* expiry — but the
+customer can now free it themselves via the resume flow's cancel option (or
+the admin can, via the Bookings tab), so a stuck slot no longer requires
+someone editing the database directly to clear. If genuine no-shows (nobody
+ever comes back to confirm or cancel) start tying up the calendar, an
+automatic expiry/cleanup job for old unpaid pending bookings would be the
+next step.
 
 ## Pricing
 

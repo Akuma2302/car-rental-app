@@ -42,7 +42,8 @@ repository" instructions.
   `OPEN_HOUR`, `CLOSE_HOUR`, `HALF_DAY_THRESHOLD_HOURS`,
   `FULL_DAY_THRESHOLD_HOURS`, and — if you want image uploads working —
   `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `STORAGE_BUCKET` (see
-  `backend/SUPABASE_SETUP.md`). Leave `CORS_ORIGIN` and `ADMIN_CORS_ORIGIN` for
+  `backend/SUPABASE_SETUP.md`). Leave `CORS_ORIGIN`, `ADMIN_CORS_ORIGIN`,
+  and `FRONTEND_URL` for
   now, you'll set them after steps 4 and 5.
 - Deploy. You'll get a URL like `https://your-app.onrender.com`. On first
   boot it creates your tables, seeds your cars, and creates your first admin
@@ -63,8 +64,11 @@ repository" instructions.
 - You'll get a second URL, e.g. `https://your-app-admin.netlify.app`
 
 **6. Connect everything:**
-- Back in Render, set `CORS_ORIGIN` to your step-4 URL and
-  `ADMIN_CORS_ORIGIN` to your step-5 URL, then redeploy the backend.
+- Back in Render, set `CORS_ORIGIN` **and** `FRONTEND_URL` to your step-4
+  URL, and `ADMIN_CORS_ORIGIN` to your step-5 URL, then redeploy the
+  backend. (`FRONTEND_URL` is what gets used to build the "resume your
+  booking" link in the WhatsApp message — if it's left as `localhost`,
+  that link won't work for real customers.)
 - In Netlify/Vercel, point your real domain at the customer frontend (step
   4). The admin app (step 5) can stay on its free `*.netlify.app` /
   `*.vercel.app` URL, or use a subdomain like `admin.yourbusiness.com` — no

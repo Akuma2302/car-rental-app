@@ -18,3 +18,11 @@ export function confirmPayment(bookingId, file) {
     headers: {},
   });
 }
+
+export function fetchBookingStatus(bookingId) {
+  return request(`/bookings/${bookingId}`);
+}
+
+export function cancelOwnBooking(bookingId) {
+  return request(`/bookings/${bookingId}/cancel`, { method: 'POST' });
+}

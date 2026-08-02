@@ -70,7 +70,15 @@ const bookingService = {
       throw err;
     }
 
-    const whatsappUrl = buildWhatsappLink({ car, startAt, endAt, totalPrice, customerName, customerPhone });
+    const whatsappUrl = buildWhatsappLink({
+      car,
+      startAt,
+      endAt,
+      totalPrice,
+      customerName,
+      customerPhone,
+      bookingId: booking.id,
+    });
 
     return { booking, whatsappUrl };
   },
@@ -115,6 +123,50 @@ const bookingService = {
     }
     if (booking.status === 'cancelled') {
       const err = new Error('This booking is already cancelled.');
+      err.status = 409;
+      throw err;
+    }
+
+    return bookingRepository.cancel(bookingId);
+  },
+
+  /**
+   * Public, customer-facing lookup — used by the "resume your booking"
+   * flow (via a link saved locally or included in the WhatsApp message).
+   * Scoped by the booking's own unguessable UUID; no admin auth needed,
+   * same reasoning as confirmPayment above.
+   */
+  async getBookingStatus(bookingId) {
+    const booking = await bookingRepository.findById(bookingId);
+    if (!booking) {
+      const err = new Error('Booking not found');
+      err.status = 404;
+      throw err;
+    }
+    const car = await carRepository.findById(booking.carId);
+    return { ...booking, carName: car ? car.name : null };
+  },
+
+  /**
+   * Public, customer-facing cancel — lets someone back out of their own
+   * pending booking (e.g. they changed their mind, or picked the wrong
+   * dates) without needing to contact the business. Deliberately only
+   * allowed while still "pending": once payment is confirmed, cancelling
+   * needs a human (the business), not a public endpoint.
+   */
+  async cancelOwnBooking(bookingId) {
+    const booking = await bookingRepository.findById(bookingId);
+    if (!booking) {
+      const err = new Error('Booking not found');
+      err.status = 404;
+      throw err;
+    }
+    if (booking.status !== 'pending') {
+      const err = new Error(
+        booking.status === 'cancelled'
+          ? 'This booking is already cancelled.'
+          : 'This booking has already been confirmed — please contact us to cancel it.'
+      );
       err.status = 409;
       throw err;
     }

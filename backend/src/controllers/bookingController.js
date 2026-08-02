@@ -20,4 +20,14 @@ const confirmPayment = asyncHandler(async (req, res) => {
   res.json(booking);
 });
 
-module.exports = { createBooking, confirmPayment };
+const getBookingStatus = asyncHandler(async (req, res) => {
+  const booking = await bookingService.getBookingStatus(req.params.bookingId);
+  res.json(booking);
+});
+
+const cancelOwnBooking = asyncHandler(async (req, res) => {
+  const booking = await bookingService.cancelOwnBooking(req.params.bookingId);
+  res.json(booking);
+});
+
+module.exports = { createBooking, confirmPayment, getBookingStatus, cancelOwnBooking };

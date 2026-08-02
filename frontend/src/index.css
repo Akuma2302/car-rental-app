@@ -137,10 +137,55 @@ h3 {
 .btn-block {
   width: 100%;
 }
+.btn-sm {
+  padding: 9px 16px;
+  font-size: 0.84rem;
+}
 
 :focus-visible {
   outline: 2px solid var(--amber);
   outline-offset: 3px;
+}
+
+/* ===================== PENDING BOOKING BANNER ===================== */
+.pending-banner {
+  background: var(--amber);
+  color: var(--ink);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.88rem;
+  text-align: center;
+}
+.pending-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pending-banner .btn-primary {
+  background: var(--ink);
+  color: #fff;
+}
+.pending-banner .btn-primary:hover {
+  background: var(--dusk);
+}
+.pending-banner-dismiss {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(19, 22, 31, 0.12);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pending-banner-dismiss:hover {
+  background: rgba(19, 22, 31, 0.22);
 }
 
 /* ===================== NAV ===================== */
@@ -886,6 +931,10 @@ h3 {
 .success-state .check-pending {
   background: rgba(242, 169, 59, 0.18);
   color: var(--amber-dark);
+}
+.success-state .check-cancelled {
+  background: rgba(19, 22, 31, 0.08);
+  color: var(--ink-soft);
 }
 .success-state h4 {
   font-size: 1.15rem;

@@ -4,15 +4,29 @@ const BookingContext = createContext(null);
 
 export function BookingProvider({ children }) {
   const [activeCarId, setActiveCarId] = useState(null);
+  // Set only when reopening an existing pending booking (resume flow) —
+  // null means "start a fresh booking for this car" instead.
+  const [resumeBookingId, setResumeBookingId] = useState(null);
 
   const value = useMemo(
     () => ({
       activeCarId,
+      resumeBookingId,
       isOpen: activeCarId !== null,
-      openBooking: (carId) => setActiveCarId(carId),
-      closeBooking: () => setActiveCarId(null),
+      openBooking: (carId) => {
+        setResumeBookingId(null);
+        setActiveCarId(carId);
+      },
+      resumeBooking: (carId, bookingId) => {
+        setResumeBookingId(bookingId);
+        setActiveCarId(carId);
+      },
+      closeBooking: () => {
+        setActiveCarId(null);
+        setResumeBookingId(null);
+      },
     }),
-    [activeCarId]
+    [activeCarId, resumeBookingId]
   );
 
   return <BookingContext.Provider value={value}>{children}</BookingContext.Provider>;
