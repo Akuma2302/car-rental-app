@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { fetchAdminBookings, cancelBooking } from '../services/bookingService.js';
 import { formatDateTime } from '../utils/date.js';
+import BookingsFilters, { DEFAULT_BOOKING_FILTERS, getDurationBand } from './BookingsFilters.jsx';
 
 const STATUS_LABELS = { pending: 'Pending', booked: 'Booked', cancelled: 'Cancelled' };
 
@@ -13,14 +14,42 @@ function durationLabel(startAt, endAt) {
   return rem > 0 ? `${days}d ${rem}h` : `${days}d`;
 }
 
+function applyFilters(bookings, filters) {
+  const query = filters.search.trim().toLowerCase();
+
+  return bookings.filter((b) => {
+    if (filters.status && b.status !== filters.status) return false;
+    if (filters.carId && b.carId !== filters.carId) return false;
+    if (filters.duration && getDurationBand(b.startAt, b.endAt) !== filters.duration) return false;
+
+    if (filters.bookedFrom && new Date(b.createdAt) < new Date(`${filters.bookedFrom}T00:00:00`)) return false;
+    if (filters.bookedTo && new Date(b.createdAt) > new Date(`${filters.bookedTo}T23:59:59`)) return false;
+
+    if (filters.pickupFrom && new Date(b.startAt) < new Date(`${filters.pickupFrom}T00:00:00`)) return false;
+    if (filters.pickupTo && new Date(b.startAt) > new Date(`${filters.pickupTo}T23:59:59`)) return false;
+
+    if (
+      query &&
+      !(
+        b.customerName.toLowerCase().includes(query) ||
+        b.customerPhone.toLowerCase().includes(query) ||
+        b.carName.toLowerCase().includes(query)
+      )
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
 function BookingsPanel() {
   const { token, logout } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [filters, setFilters] = useState(DEFAULT_BOOKING_FILTERS);
 
   useEffect(() => {
     let cancelledRequest = false;
@@ -63,16 +92,20 @@ function BookingsPanel() {
     }
   }
 
-  const query = search.trim().toLowerCase();
-  const filtered = bookings.filter((b) => {
-    if (statusFilter && b.status !== statusFilter) return false;
-    if (!query) return true;
-    return (
-      b.customerName.toLowerCase().includes(query) ||
-      b.customerPhone.toLowerCase().includes(query) ||
-      b.carName.toLowerCase().includes(query)
-    );
-  });
+  // Distinct cars appearing in the bookings list, for the car filter —
+  // avoids a second API call just to populate this dropdown.
+  const cars = useMemo(() => {
+    const byId = new Map();
+    for (const b of bookings) {
+      if (!byId.has(b.carId)) byId.set(b.carId, { id: b.carId, name: b.carName });
+    }
+    return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
+  }, [bookings]);
+
+  // Bookings already arrive sorted newest-created-first from the API —
+  // filtering with .filter() preserves that order, so no separate sort
+  // step is needed here.
+  const filtered = useMemo(() => applyFilters(bookings, filters), [bookings, filters]);
 
   // Only count confirmed (paid), non-cancelled bookings — pending hasn't
   // been paid yet, and cancelled shouldn't count as revenue at all.
@@ -82,29 +115,13 @@ function BookingsPanel() {
 
   return (
     <div className="panel">
-      <div className="panel-toolbar">
-        <input
-          type="text"
-          placeholder="Search by name, phone, or car…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="search-input"
-        />
-        <select
-          className="filter-select"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          aria-label="Filter by status"
-        >
-          <option value="">All statuses</option>
-          <option value="pending">Pending only</option>
-          <option value="booked">Booked only</option>
-          <option value="cancelled">Cancelled only</option>
-        </select>
-        <span className="panel-count">
-          {filtered.length} booking{filtered.length === 1 ? '' : 's'} · RM{confirmedRevenue} confirmed
-        </span>
-      </div>
+      <BookingsFilters
+        filters={filters}
+        onChange={setFilters}
+        cars={cars}
+        resultCount={filtered.length}
+        confirmedRevenue={confirmedRevenue}
+      />
 
       {actionError && <p className="form-error">{actionError}</p>}
 
@@ -113,7 +130,7 @@ function BookingsPanel() {
 
       {!loading && !error && filtered.length === 0 && (
         <p className="state-message">
-          {bookings.length === 0 ? 'No bookings yet.' : 'No bookings match your search.'}
+          {bookings.length === 0 ? 'No bookings yet.' : 'No bookings match your filters.'}
         </p>
       )}
 

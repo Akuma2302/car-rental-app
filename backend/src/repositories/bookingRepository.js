@@ -24,7 +24,7 @@ const bookingRepository = {
       `SELECT b.*, c.name AS car_name
        FROM bookings b
        JOIN cars c ON c.id = b.car_id
-       ORDER BY b.start_at DESC`
+       ORDER BY b.created_at DESC`
     );
     return rows.map((row) => ({ ...toBookingDto(row), carName: row.car_name }));
   },

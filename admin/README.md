@@ -33,10 +33,13 @@ than one admin login, insert a row into the `admin_users` table directly
   (utilization rate, average daily rate, RevPAC, average idle time between
   bookings), today's pick-ups and drop-offs, overdue returns, currently-out
   rentals, and a status chip per car.
-- **Bookings tab:** every booking ever made, newest first, with pick-up/
-  return date-times, duration, status (Pending/Booked/Cancelled), and total
-  price — searchable by customer name, phone, or car, filterable by status.
-  A "View" link opens the uploaded payment receipt. A "Cancel" button frees
+- **Bookings tab:** every booking ever made, sorted by when it was booked
+  (newest first) by default, with pick-up/return date-times, duration,
+  status (Pending/Booked/Cancelled), and total price. Search by customer
+  name, phone, or car; filter by status, specific car, rental duration
+  (under 1 day / 1–3 days / 3–7 days / 7+ days), booked-on date range, and
+  pick-up date range — mix and match, "Clear filters" resets them all. A
+  "View" link opens the uploaded payment receipt. A "Cancel" button frees
   the booking's date range immediately and excludes it from revenue.
 - **Cars tab:** add, edit, or delete cars — including transmission, fuel
   type, category, seats, and three pricing tiers (hourly/half-day/daily).

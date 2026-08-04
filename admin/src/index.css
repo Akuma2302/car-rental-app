@@ -266,6 +266,64 @@ code {
   font-size: 0.8rem;
   color: var(--ink-soft);
 }
+
+.filters-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.filters-row-dates {
+  padding-top: 4px;
+  border-top: 1px dashed var(--line);
+}
+.filter-date-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+}
+.filter-date-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.filter-date-group input[type='date'] {
+  border: none;
+  font: inherit;
+  font-size: 0.84rem;
+  background: transparent;
+  padding: 2px 0;
+  color: var(--ink);
+}
+.filter-date-group input[type='date']:focus {
+  outline: none;
+}
+.filter-date-sep {
+  color: var(--ink-soft);
+}
+.filters-clear {
+  padding: 8px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--line);
+  background: transparent;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--coral);
+}
+.filters-clear:hover {
+  background: var(--coral-light);
+}
 .search-input {
   flex: 1;
   min-width: 220px;
