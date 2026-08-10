@@ -20,6 +20,9 @@
  * @property {string} customerName
  * @property {string} customerPhone
  * @property {string} createdAt
+ * @property {string|null} agentNotifiedAt  - set when the AI Agent pings the admin about a stale pending booking
+ * @property {'confirmed'|'cancelled'|null} agentDecision - what the admin tapped in Telegram, if anything
+ * @property {string|null} telegramMessageId
  */
 
 module.exports = {};

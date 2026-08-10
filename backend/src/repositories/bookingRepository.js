@@ -15,6 +15,9 @@ function toBookingDto(row) {
     customerName: row.customer_name,
     customerPhone: row.customer_phone,
     createdAt: row.created_at,
+    agentNotifiedAt: row.agent_notified_at,
+    agentDecision: row.agent_decision,
+    telegramMessageId: row.telegram_message_id,
   };
 }
 

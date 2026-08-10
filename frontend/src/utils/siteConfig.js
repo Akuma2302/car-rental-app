@@ -5,7 +5,7 @@
 // in backend/.env (WHATSAPP_NUMBER) — keep the value below in sync with it,
 // it's used here only for display (nav bar, footer, "Call us" button).
 export const siteConfig = {
-  businessName: 'JalanGo',
+  businessName: 'JarGo',
   phoneDisplay: '017-250 7341',
   phoneHref: 'tel:+60172507341',
   whatsappNumber: '60172507341',

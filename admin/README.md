@@ -38,9 +38,12 @@ than one admin login, insert a row into the `admin_users` table directly
   status (Pending/Booked/Cancelled), and total price. Search by customer
   name, phone, or car; filter by status, specific car, rental duration
   (under 1 day / 1–3 days / 3–7 days / 7+ days), booked-on date range, and
-  pick-up date range — mix and match, "Clear filters" resets them all. A
-  "View" link opens the uploaded payment receipt. A "Cancel" button frees
-  the booking's date range immediately and excludes it from revenue.
+  pick-up date range — mix and match, "Clear filters" resets them all. For
+  a pending booking, an "Upload receipt" control lets the admin attach the
+  payment receipt the customer sent over WhatsApp — this is what flips the
+  booking to Booked. Once uploaded, a "View" link opens it instead. A
+  "Cancel" button frees the booking's date range immediately and excludes
+  it from revenue.
 - **Cars tab:** add, edit, or delete cars — including transmission, fuel
   type, category, seats, and three pricing tiers (hourly/half-day/daily).
   Upload up to 8 photos per car (JPEG/PNG/WebP, 8MB each) and pick which one

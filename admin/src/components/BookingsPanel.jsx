@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { fetchAdminBookings, cancelBooking } from '../services/bookingService.js';
+import { fetchAdminBookings, cancelBooking, uploadBookingReceipt } from '../services/bookingService.js';
 import { formatDateTime } from '../utils/date.js';
 import BookingsFilters, { DEFAULT_BOOKING_FILTERS, getDurationBand } from './BookingsFilters.jsx';
 
@@ -49,6 +49,7 @@ function BookingsPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
+  const [uploadingId, setUploadingId] = useState(null);
   const [filters, setFilters] = useState(DEFAULT_BOOKING_FILTERS);
 
   useEffect(() => {
@@ -89,6 +90,21 @@ function BookingsPanel() {
     } catch (err) {
       if (err.status === 401) return logout();
       setActionError(err.message || 'Could not cancel booking');
+    }
+  }
+
+  async function handleUploadReceipt(booking, file) {
+    if (!file) return;
+    setActionError('');
+    setUploadingId(booking.id);
+    try {
+      const updated = await uploadBookingReceipt(token, booking.id, file);
+      setBookings((prev) => prev.map((b) => (b.id === booking.id ? { ...b, ...updated } : b)));
+    } catch (err) {
+      if (err.status === 401) return logout();
+      setActionError(err.message || 'Could not upload receipt');
+    } finally {
+      setUploadingId(null);
     }
   }
 
@@ -172,6 +188,17 @@ function BookingsPanel() {
                       <a href={b.receiptUrl} target="_blank" rel="noreferrer">
                         View
                       </a>
+                    ) : b.status === 'pending' ? (
+                      <label className="btn btn-outline btn-sm">
+                        {uploadingId === b.id ? 'Uploading…' : 'Upload receipt'}
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          style={{ display: 'none' }}
+                          disabled={uploadingId === b.id}
+                          onChange={(e) => handleUploadReceipt(b, e.target.files?.[0])}
+                        />
+                      </label>
                     ) : (
                       <span className="table-muted">—</span>
                     )}

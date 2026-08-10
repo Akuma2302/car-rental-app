@@ -14,6 +14,7 @@ const {
   deleteCarImage,
   setCoverImage,
   cancelBooking,
+  uploadBookingReceipt,
 } = require('../controllers/adminController');
 
 const router = express.Router();
@@ -23,6 +24,7 @@ router.use(requireAdmin);
 
 router.get('/bookings', listBookings);
 router.put('/bookings/:bookingId/cancel', cancelBooking);
+router.post('/bookings/:bookingId/receipt', upload.single('receipt'), uploadBookingReceipt);
 
 router.get('/dashboard', getDashboardOverview);
 

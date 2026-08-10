@@ -70,7 +70,7 @@ The API starts on **http://localhost:4000** (change with `PORT`).
 | `JWT_SECRET` | Signs admin login sessions | *(required, no default)* |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Bootstraps the first admin account | `admin` / *(required first run)* |
 | `WHATSAPP_NUMBER` | Your WhatsApp number, country code first, digits only | `60172507341` |
-| `BUSINESS_NAME` | Shown in the WhatsApp message | `JalanGo` |
+| `BUSINESS_NAME` | Shown in the WhatsApp message | `JarGo` |
 | `OPEN_HOUR` / `CLOSE_HOUR` | Daily operating hours (24h) | `7` / `22` |
 | `CORS_ORIGIN` | Customer frontend's origin | `http://localhost:5173` |
 | `ADMIN_CORS_ORIGIN` | Admin app's origin | `http://localhost:5174` |
@@ -91,12 +91,14 @@ The API starts on **http://localhost:4000** (change with `PORT`).
 | GET | `/api/cars/:carId/price-quote?startAt=...&endAt=...` | Live price + duration for a proposed booking |
 | POST | `/api/bookings` | Create a booking (always starts `pending`) → `{ booking, whatsappUrl }` |
 | GET | `/api/bookings/:bookingId` | Look up a booking's current status (used by the resume flow) |
-| POST | `/api/bookings/:bookingId/confirm-payment` | Upload a receipt (multipart, field `receipt`) → flips the booking to `booked` |
 | POST | `/api/bookings/:bookingId/cancel` | Customer self-cancel — only works while still `pending` |
 | POST | `/api/auth/login` | Admin login → `{ token, username }` |
 | GET | `/api/health` | Health check |
 
 **Admin-only** (require `Authorization: Bearer <token>` from login):
+- `POST /api/admin/bookings/:bookingId/receipt` — upload the receipt the
+  admin received from the customer over WhatsApp (multipart, field
+  `receipt`) → flips the booking to `booked`.
 
 | Method | Path | Purpose |
 |---|---|---|
@@ -159,11 +161,10 @@ as pending ones.
 
 ## Recovering a pending booking
 
-If a customer closes the tab before confirming payment, nothing is lost —
-the booking stays `pending` and there are two ways back to it:
+If a customer closes the tab before their booking is confirmed, nothing is
+lost — the booking stays `pending` and there are two ways back to it:
 - The WhatsApp message includes a link
-  (`{FRONTEND_URL}/?booking={id}`) straight back to that booking's
-  confirm-payment/cancel screen.
+  (`{FRONTEND_URL}/?booking={id}`) straight back to that booking's screen.
 - The frontend also remembers the booking locally (`localStorage`), so
   simply returning to the site later shows a small banner offering to
   resume it — this works even without the link, as long as it's the same
@@ -171,11 +172,12 @@ the booking stays `pending` and there are two ways back to it:
 
 Both paths use `GET /api/bookings/:bookingId` to check the booking's
 current status (in case it was already confirmed or cancelled elsewhere)
-before deciding what to show. From that screen the customer can either
-upload a receipt (same as `confirm-payment` above) or cancel outright via
-`POST /api/bookings/:bookingId/cancel` — deliberately only permitted while
-still `pending`; once payment is confirmed, cancelling needs a human via
-the admin app, not a public endpoint.
+before deciding what to show. From that screen the customer can cancel
+outright via `POST /api/bookings/:bookingId/cancel` — deliberately only
+permitted while still `pending`; once payment is confirmed, cancelling
+needs a human via the admin app, not a public endpoint. There's nothing
+left for the customer to upload — the receipt goes to the admin over
+WhatsApp, and the admin uploads it on the system.
 
 There's a third path too, for the most common trip-up: if someone tries to
 book the *same* car again while their own earlier booking on it is still
@@ -189,18 +191,21 @@ booking instead of a dead-end error.
 A booking is never immediately "final." It starts `pending` the instant a
 customer confirms via WhatsApp — that step only reserves the time range and
 opens WhatsApp with the details, it doesn't mean payment happened. The
-customer (or the business, relaying it) then arranges payment over
-WhatsApp, and the customer uploads a photo of their receipt through
-`POST /api/bookings/:bookingId/confirm-payment`, which is what actually
+customer then sends their payment receipt to the business over WhatsApp,
+and the **admin** uploads that receipt through
+`POST /api/admin/bookings/:bookingId/receipt`, which is what actually
 flips the booking to `booked`.
 
-This endpoint is deliberately public (no admin login) — it's the customer
-completing their own booking, not an admin action. It's scoped by the
-booking's id, a random UUID, so it can't be guessed or enumerated; the
-endpoint also rejects with 404/409 if the booking doesn't exist or was
-already confirmed, so it can't be replayed or misused even if a receipt URL
-somehow leaked. Receipts upload to the same Supabase Storage bucket as car
-images, under a separate `receipts/` path.
+This endpoint requires admin login (`requireAdmin`) — the customer no
+longer confirms their own booking. The endpoint rejects with 404/409 if the
+booking doesn't exist or was already confirmed, so it can't be replayed or
+misused. Receipts upload to the same Supabase Storage bucket as car images,
+under a separate `receipts/` path.
+
+If a booking is still `pending` about 4 hours after it was made, an AI
+Agent notifies the admin over Telegram to confirm or cancel it, and
+auto-cancels it if the admin doesn't respond — see the AI Agent section
+below (once added) for setup.
 
 **Worth knowing:** a `pending` booking still holds its time range for as
 long as it stays pending, and there's still no *automatic* expiry — but the

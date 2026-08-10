@@ -153,6 +153,23 @@ BEGIN
       WHERE (status <> 'cancelled');
   END IF;
 END $$;
+
+-- AI Agent (Telegram) follow-up: a booking still "pending" ~4 hours after
+-- creation gets a message sent to the admin asking to confirm or cancel it.
+-- agent_notified_at stops that message being sent twice; agent_decision
+-- records what the admin tapped in reply (still null until they respond,
+-- or if the sweep auto-cancelled it after a no-response timeout).
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS agent_notified_at TIMESTAMPTZ;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS agent_decision TEXT;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS telegram_message_id TEXT;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'bookings_agent_decision_check') THEN
+    ALTER TABLE bookings ADD CONSTRAINT bookings_agent_decision_check
+      CHECK (agent_decision IS NULL OR agent_decision IN ('confirmed', 'cancelled'));
+  END IF;
+END $$;
 `;
 
 async function seedCarsIfEmpty() {

@@ -12,14 +12,6 @@ const createBooking = asyncHandler(async (req, res) => {
   res.status(201).json(result);
 });
 
-const confirmPayment = asyncHandler(async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'A receipt image is required' });
-  }
-  const booking = await bookingService.confirmPayment(req.params.bookingId, req.file);
-  res.json(booking);
-});
-
 const getBookingStatus = asyncHandler(async (req, res) => {
   const booking = await bookingService.getBookingStatus(req.params.bookingId);
   res.json(booking);
@@ -30,4 +22,4 @@ const cancelOwnBooking = asyncHandler(async (req, res) => {
   res.json(booking);
 });
 
-module.exports = { createBooking, confirmPayment, getBookingStatus, cancelOwnBooking };
+module.exports = { createBooking, getBookingStatus, cancelOwnBooking };

@@ -84,12 +84,11 @@ const bookingService = {
   },
 
   /**
-   * Second step of the flow: customer uploads a payment receipt for a
-   * booking they already made via WhatsApp. Flips it from "pending" to
-   * "booked". Rejects if the booking doesn't exist or was already
-   * confirmed — this endpoint is public (no admin login), scoped only by
-   * the booking's own unguessable UUID, so it can't be used to tamper with
-   * someone else's booking without knowing its id.
+   * Second step of the flow: the admin uploads the payment receipt they
+   * received from the customer over WhatsApp. Flips the booking from
+   * "pending" to "booked". Rejects if the booking doesn't exist or was
+   * already confirmed. Admin-only (requireAdmin) — the customer no longer
+   * uploads their own receipt.
    */
   async confirmPayment(bookingId, file) {
     const booking = await bookingRepository.findById(bookingId);

@@ -69,17 +69,23 @@ of failing silently if they can't reach it.
    tier, based on duration), saves the booking, and returns a `wa.me` link
    with everything pre-filled; the customer's browser opens it, they hit
    send, and arranges payment with the business over WhatsApp.
-5. Back on the site, the customer uploads a photo of their payment receipt
-   and submits it → this flips the booking to status **booked**. This step
-   is what actually confirms the booking, not the WhatsApp message itself.
+5. The customer sends their payment receipt to the business over WhatsApp
+   (not through the site). The admin uploads that receipt in the admin
+   dashboard's Bookings tab → this flips the booking to status **booked**.
+   This step is what actually confirms the booking, not the WhatsApp
+   message itself.
 6. **The booking is visible in the admin dashboard the whole time** — as
-   soon as it's created (marked "Pending"), and updates live once payment
-   is confirmed (marked "Booked", with a link to view the receipt).
-7. If the customer closes the tab before finishing step 5, they're not
-   stuck — the WhatsApp message includes a link straight back to that
-   booking, and the site also remembers it locally so a banner offers to
-   resume it on their next visit. From there they can either finish
-   confirming payment or cancel the booking themselves.
+   soon as it's created (marked "Pending"), and updates once the admin
+   uploads the receipt (marked "Booked", with a link to view the receipt).
+7. If a booking sits **pending for about 4 hours**, an AI Agent notifies
+   the admin (via Telegram) to confirm or cancel it — if the admin doesn't
+   respond, it's cancelled automatically so the slot frees up. See
+   `backend/README.md` for the agent setup.
+8. The customer isn't left stuck either — if they close the tab before
+   finishing on WhatsApp, the message includes a link straight back to
+   that booking, and the site also remembers it locally so a banner offers
+   to resume it on their next visit, from where they can cancel it
+   themselves if they change their mind.
 
 ## What to edit for your business
 

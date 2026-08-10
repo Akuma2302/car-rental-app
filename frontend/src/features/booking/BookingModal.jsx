@@ -10,7 +10,6 @@ import { siteConfig } from '../../utils/siteConfig.js';
 import Button from '../../components/Button.jsx';
 import { CloseIcon, CheckIcon } from '../../components/icons.jsx';
 import DateTimeField from './DateTimeField.jsx';
-import ReceiptUpload from './ReceiptUpload.jsx';
 
 function defaultPickupTime() {
   const nextHour = Math.min(Math.max(new Date().getHours() + 1, siteConfig.openHour), siteConfig.closeHour);
@@ -34,7 +33,6 @@ function BookingModal({ cars }) {
   const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [createdBookingId, setCreatedBookingId] = useState(null);
-  const [showReceiptUpload, setShowReceiptUpload] = useState(false);
   const [cancelling, setCancelling] = useState(false);
 
   const { ranges: bookedRanges, reload: reloadRanges } = useBookedRanges(
@@ -61,7 +59,6 @@ function BookingModal({ cars }) {
       setStatus('loading-resume');
       setErrorMessage('');
       setCreatedBookingId(resumeBookingId);
-      setShowReceiptUpload(false);
 
       fetchBookingStatus(resumeBookingId)
         .then((booking) => {
@@ -95,7 +92,6 @@ function BookingModal({ cars }) {
     setStatus('idle');
     setErrorMessage('');
     setCreatedBookingId(null);
-    setShowReceiptUpload(false);
     return undefined;
   }, [activeCarId, resumeBookingId, isOpen]);
 
@@ -170,12 +166,6 @@ function BookingModal({ cars }) {
     }
   }
 
-  function handlePaymentConfirmed() {
-    clearPendingBooking();
-    setStatus('confirmed');
-    setShowReceiptUpload(false);
-  }
-
   async function handleCancelBooking() {
     if (!createdBookingId) return;
     if (!window.confirm("Cancel this booking? You'll need to start over if you change your mind.")) return;
@@ -198,7 +188,6 @@ function BookingModal({ cars }) {
     setName('');
     setPhone('');
     setCreatedBookingId(null);
-    setShowReceiptUpload(false);
   }
 
   function handleOverlayClick(e) {
@@ -331,29 +320,19 @@ function BookingModal({ cars }) {
               </div>
               <h4>Booking request sent — status: pending</h4>
               <p>
-                We opened WhatsApp with your booking details. Arrange payment with our team there, then come
-                back and confirm below by uploading your payment receipt. Changed your mind? You can cancel
+                We opened WhatsApp with your booking details. Send your payment receipt to us there — our team
+                will confirm it on our end, no need to upload anything here. Changed your mind? You can cancel
                 this booking instead.
               </p>
 
               {errorMessage && <p className="form-error">{errorMessage}</p>}
 
-              {!showReceiptUpload ? (
-                <>
-                  <Button block onClick={() => setShowReceiptUpload(true)}>
-                    Confirm payment
-                  </Button>
-                  <Button variant="outline" block onClick={handleCancelBooking} disabled={cancelling}>
-                    {cancelling ? 'Cancelling…' : 'Cancel this booking'}
-                  </Button>
-                </>
-              ) : (
-                <ReceiptUpload
-                  bookingId={createdBookingId}
-                  onConfirmed={handlePaymentConfirmed}
-                  onCancel={() => setShowReceiptUpload(false)}
-                />
-              )}
+              <Button block onClick={closeBooking}>
+                Got it
+              </Button>
+              <Button variant="outline" block onClick={handleCancelBooking} disabled={cancelling}>
+                {cancelling ? 'Cancelling…' : 'Cancel this booking'}
+              </Button>
             </div>
           ) : status === 'cancelled' ? (
             <div className="success-state show">

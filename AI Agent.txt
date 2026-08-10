@@ -1,0 +1,13 @@
+for now on, the branding will become JarGo, so change the brand
+
+
+
+now we need to change the booking sistem, the current system the user need to upload resit for booking, but now no need, just put button okay(sugggest best one)
+
+
+
+so after the user confirm at whatsapp, the user will upload the resit on whatsapp, then the resit admin must upload it on the system. if the booking is pending about 4 hours, an AI agent will send message to the admin either the pending booking is confirm or not, if yes admin need to upload the resit for booking, if not the AI agent will cancel the pending booking.
+
+
+
+give me step by step to integrate AI Agent in this sistem, and choose which platform better for AI Agent to communicate with the admin, either whatsapp or telegram
