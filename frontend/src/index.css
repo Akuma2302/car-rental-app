@@ -1,28 +1,28 @@
 :root {
-  --ink: #13161f;
-  --dusk: #232c45;
-  --stone: #ede9df;
-  --card: #fbf9f3;
-  --amber: #f2a93b;
-  --amber-dark: #d88f22;
-  --jade: #2e8b79;
-  --jade-light: #e3f1ec;
-  --coral: #e2503a;
-  --coral-light: #fbe7e3;
-  --ink-soft: rgba(19, 22, 31, 0.64);
-  --line: rgba(19, 22, 31, 0.13);
-  --line-light: rgba(255, 255, 255, 0.16);
+  --ink: #0f1b2e;
+  --dusk: #16233b;
+  --stone: #f4f6f9;
+  --card: #ffffff;
+  --amber: #f5a623;
+  --amber-dark: #dc8f13;
+  --jade: #16a34a;
+  --jade-light: #e7f7ec;
+  --coral: #ef4444;
+  --coral-light: #fdecec;
+  --ink-soft: rgba(15, 27, 46, 0.62);
+  --line: rgba(15, 27, 46, 0.12);
+  --line-light: rgba(255, 255, 255, 0.14);
 
-  --font-display: 'Bricolage Grotesque', sans-serif;
-  --font-body: 'Plus Jakarta Sans', sans-serif;
-  --font-mono: 'Space Mono', monospace;
+  --font-display: 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'Inter', sans-serif;
 
-  --radius-lg: 24px;
-  --radius-md: 16px;
-  --radius-sm: 10px;
-  --shadow-card: 0 14px 32px -16px rgba(19, 22, 31, 0.38);
-  --shadow-modal: 0 30px 80px -18px rgba(19, 22, 31, 0.55);
-  --container: 1140px;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow-card: 0 10px 26px -14px rgba(15, 27, 46, 0.22);
+  --shadow-modal: 0 26px 64px -18px rgba(15, 27, 46, 0.4);
+  --container: 1180px;
 }
 
 * {
@@ -95,7 +95,7 @@ h3 {
   justify-content: center;
   gap: 8px;
   padding: 14px 26px;
-  border-radius: 100px;
+  border-radius: 10px;
   border: 1px solid transparent;
   font-weight: 700;
   font-size: 0.95rem;
@@ -111,7 +111,7 @@ h3 {
 }
 .btn-primary:hover {
   background: var(--amber-dark);
-  box-shadow: 0 10px 24px -10px rgba(242, 169, 59, 0.65);
+  box-shadow: 0 10px 24px -10px rgba(245, 166, 35, 0.65);
 }
 .btn:disabled {
   opacity: 0.45;
@@ -177,7 +177,7 @@ h3 {
   height: 26px;
   border-radius: 50%;
   border: none;
-  background: rgba(19, 22, 31, 0.12);
+  background: rgba(15, 27, 46, 0.12);
   color: var(--ink);
   display: flex;
   align-items: center;
@@ -185,7 +185,7 @@ h3 {
   flex-shrink: 0;
 }
 .pending-banner-dismiss:hover {
-  background: rgba(19, 22, 31, 0.22);
+  background: rgba(15, 27, 46, 0.22);
 }
 
 /* ===================== NAV ===================== */
@@ -193,7 +193,7 @@ h3 {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(19, 22, 31, 0.92);
+  background: rgba(15, 27, 46, 0.92);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line-light);
 }
@@ -242,7 +242,7 @@ h3 {
   text-decoration: none;
   border: 1px solid var(--line-light);
   padding: 9px 16px;
-  border-radius: 100px;
+  border-radius: 10px;
   white-space: nowrap;
 }
 @media (max-width: 760px) {
@@ -273,7 +273,7 @@ h3 {
   width: 560px;
   height: 560px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(242, 169, 59, 0.35), transparent 70%);
+  background: radial-gradient(circle, rgba(245, 166, 35, 0.35), transparent 70%);
   z-index: 1;
   pointer-events: none;
 }
@@ -366,7 +366,7 @@ h3 {
 }
 .filter-select {
   padding: 10px 14px;
-  border-radius: 100px;
+  border-radius: 8px;
   border: 1px solid var(--line);
   background: var(--card);
   font: inherit;
@@ -379,7 +379,7 @@ h3 {
 }
 .filters-clear {
   padding: 10px 16px;
-  border-radius: 100px;
+  border-radius: 8px;
   border: 1px solid var(--line);
   background: transparent;
   font-size: 0.86rem;
@@ -441,7 +441,7 @@ h3 {
   height: 30px;
   border-radius: 50%;
   border: none;
-  background: rgba(19, 22, 31, 0.55);
+  background: rgba(15, 27, 46, 0.55);
   color: #fff;
   font-size: 1.2rem;
   line-height: 1;
@@ -450,7 +450,7 @@ h3 {
   justify-content: center;
 }
 .carousel-nav:hover {
-  background: rgba(19, 22, 31, 0.8);
+  background: rgba(15, 27, 46, 0.8);
 }
 .carousel-prev {
   left: 10px;
@@ -569,16 +569,16 @@ h3 {
   margin-bottom: 18px;
 }
 .usp-icon-amber {
-  background: rgba(242, 169, 59, 0.16);
+  background: rgba(245, 166, 35, 0.16);
   color: var(--amber);
 }
 .usp-icon-jade {
-  background: rgba(46, 139, 121, 0.22);
-  color: #5fc3ad;
+  background: rgba(22, 163, 74, 0.22);
+  color: #4ade80;
 }
 .usp-icon-coral {
-  background: rgba(226, 80, 58, 0.18);
-  color: #f08068;
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
 }
 .usp-card h3 {
   font-size: 1.12rem;
@@ -761,7 +761,7 @@ h3 {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(19, 22, 31, 0.6);
+  background: rgba(15, 27, 46, 0.6);
   backdrop-filter: blur(3px);
   display: flex;
   align-items: center;
@@ -893,7 +893,7 @@ h3 {
 
 .selection-recap {
   background: var(--jade-light);
-  border: 1px solid rgba(46, 139, 121, 0.3);
+  border: 1px solid rgba(22, 163, 74, 0.3);
   border-radius: var(--radius-sm);
   padding: 12px 14px;
   font-size: 0.86rem;
@@ -914,8 +914,8 @@ h3 {
 }
 
 .existing-pending-prompt {
-  background: rgba(242, 169, 59, 0.14);
-  border: 1px solid rgba(242, 169, 59, 0.35);
+  background: rgba(245, 166, 35, 0.14);
+  border: 1px solid rgba(245, 166, 35, 0.35);
   border-radius: var(--radius-sm);
   padding: 14px;
   display: flex;
@@ -945,11 +945,11 @@ h3 {
   margin: 0 auto 16px;
 }
 .success-state .check-pending {
-  background: rgba(242, 169, 59, 0.18);
+  background: rgba(245, 166, 35, 0.18);
   color: var(--amber-dark);
 }
 .success-state .check-cancelled {
-  background: rgba(19, 22, 31, 0.08);
+  background: rgba(15, 27, 46, 0.08);
   color: var(--ink-soft);
 }
 .success-state h4 {

@@ -40,6 +40,11 @@ const env = {
   // "AI Agent" section for the full one-time setup.
   telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || '',
   telegramAdminChatId: process.env.TELEGRAM_ADMIN_CHAT_ID || '',
+  // Optional — only set this if TELEGRAM_ADMIN_CHAT_ID is a forum-enabled
+  // supergroup and you want alerts posted into one specific topic thread
+  // rather than the group's General topic. Leave unset for a private chat
+  // or a plain group.
+  telegramTopicId: process.env.TELEGRAM_TOPIC_ID ? parseInt(process.env.TELEGRAM_TOPIC_ID, 10) : null,
   // Checked against the X-Telegram-Bot-Api-Secret-Token header Telegram
   // sends with every webhook call, so random requests to the webhook URL
   // can't spoof a button tap. Set via the setWebhook call in the

@@ -57,6 +57,11 @@ const telegramService = {
 
     return callTelegram('sendMessage', {
       chat_id: env.telegramAdminChatId,
+      // Only forum-enabled supergroups with Topics turned on use this —
+      // omitted entirely for a private chat or a plain (non-forum) group,
+      // since Telegram rejects the call if you pass a thread id that
+      // doesn't apply to the target chat.
+      ...(env.telegramTopicId ? { message_thread_id: env.telegramTopicId } : {}),
       text,
       parse_mode: 'Markdown',
       reply_markup: {

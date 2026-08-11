@@ -1,24 +1,24 @@
 :root {
-  --ink: #13161f;
-  --dusk: #232c45;
-  --stone: #ede9df;
-  --card: #fbf9f3;
-  --amber: #f2a93b;
-  --amber-dark: #d88f22;
-  --jade: #2e8b79;
-  --jade-light: #e3f1ec;
-  --coral: #e2503a;
-  --coral-light: #fbe7e3;
-  --ink-soft: rgba(19, 22, 31, 0.64);
-  --line: rgba(19, 22, 31, 0.13);
+  --ink: #0f1b2e;
+  --dusk: #16233b;
+  --stone: #f4f6f9;
+  --card: #ffffff;
+  --amber: #f5a623;
+  --amber-dark: #dc8f13;
+  --jade: #16a34a;
+  --jade-light: #e7f7ec;
+  --coral: #ef4444;
+  --coral-light: #fdecec;
+  --ink-soft: rgba(15, 27, 46, 0.62);
+  --line: rgba(15, 27, 46, 0.12);
 
-  --font-body: 'Plus Jakarta Sans', sans-serif;
-  --font-mono: 'Space Mono', monospace;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'Inter', sans-serif;
 
-  --radius-lg: 20px;
-  --radius-md: 14px;
-  --radius-sm: 10px;
-  --shadow-card: 0 14px 32px -18px rgba(19, 22, 31, 0.28);
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow-card: 0 10px 26px -16px rgba(15, 27, 46, 0.24);
 }
 
 * {
@@ -60,7 +60,7 @@ code {
   justify-content: center;
   gap: 8px;
   padding: 12px 22px;
-  border-radius: 100px;
+  border-radius: 10px;
   border: 1px solid transparent;
   font-weight: 700;
   font-size: 0.92rem;
@@ -314,7 +314,7 @@ code {
 }
 .filters-clear {
   padding: 8px 14px;
-  border-radius: 100px;
+  border-radius: 8px;
   border: 1px solid var(--line);
   background: transparent;
   font-size: 0.82rem;
@@ -361,7 +361,7 @@ code {
   font-weight: 700;
 }
 .status-pending {
-  background: rgba(242, 169, 59, 0.18);
+  background: rgba(245, 166, 35, 0.18);
   color: var(--amber-dark);
 }
 .status-booked {
@@ -369,7 +369,7 @@ code {
   color: var(--jade);
 }
 .status-cancelled {
-  background: rgba(19, 22, 31, 0.08);
+  background: rgba(15, 27, 46, 0.08);
   color: var(--ink-soft);
   text-decoration: line-through;
 }
@@ -414,7 +414,7 @@ code {
 /* ===================== CAR FORM ===================== */
 .car-form {
   background: var(--jade-light);
-  border: 1px solid rgba(46, 139, 121, 0.3);
+  border: 1px solid rgba(22, 163, 74, 0.3);
   border-radius: var(--radius-md);
   padding: 20px;
   margin-bottom: 22px;
@@ -571,7 +571,7 @@ code {
   flex-shrink: 0;
 }
 .status-toggle-on {
-  border-color: rgba(46, 139, 121, 0.35);
+  border-color: rgba(22, 163, 74, 0.35);
   color: var(--jade);
 }
 .status-toggle-on .status-toggle-dot {
