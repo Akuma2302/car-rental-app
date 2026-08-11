@@ -105,6 +105,46 @@ const bookingRepository = {
     );
     return rows[0] ? toBookingDto(rows[0]) : null;
   },
+
+  /**
+   * AI Agent: bookings that have sat "pending" for at least `hours` and
+   * haven't been notified about yet. Scoped to status = 'pending' and
+   * agent_notified_at IS NULL so a booking is only ever pinged once, even
+   * if the sweep runs again before the admin replies.
+   */
+  async findStalePending(hours) {
+    const { rows } = await pool.query(
+      `SELECT b.*, c.name AS car_name
+       FROM bookings b
+       JOIN cars c ON c.id = b.car_id
+       WHERE b.status = 'pending'
+         AND b.agent_notified_at IS NULL
+         AND b.created_at <= now() - make_interval(hours => $1)
+       ORDER BY b.created_at ASC`,
+      [hours]
+    );
+    return rows.map((row) => ({ ...toBookingDto(row), carName: row.car_name }));
+  },
+
+  /** Marks a booking as having been pinged to the admin, and records which
+   * Telegram message so the agent can edit it once the admin replies. */
+  async markAgentNotified(id, telegramMessageId) {
+    const { rows } = await pool.query(
+      `UPDATE bookings SET agent_notified_at = now(), telegram_message_id = $2 WHERE id = $1 RETURNING *`,
+      [id, telegramMessageId]
+    );
+    return rows[0] ? toBookingDto(rows[0]) : null;
+  },
+
+  /** Records what the admin tapped in Telegram ('confirmed' or
+   * 'cancelled') — see bookings_agent_decision_check in migrate.js. */
+  async setAgentDecision(id, decision) {
+    const { rows } = await pool.query(`UPDATE bookings SET agent_decision = $2 WHERE id = $1 RETURNING *`, [
+      id,
+      decision,
+    ]);
+    return rows[0] ? toBookingDto(rows[0]) : null;
+  },
 };
 
 module.exports = bookingRepository;

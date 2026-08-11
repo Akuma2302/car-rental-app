@@ -267,3 +267,51 @@ assuming a fresh install. This runs automatically on every server start.
   30-day window, and "today's schedule" uses server-local day boundaries —
   both inherit the same timezone caveat noted above for `OPEN_HOUR`/
   `CLOSE_HOUR`.
+
+## AI Agent (Telegram)
+
+If a booking sits `pending` for `AGENT_PENDING_HOURS` (default 4) without
+the admin uploading a receipt, the agent messages the admin on Telegram
+with **Confirm** / **Cancel** buttons. Tapping Confirm just leaves a note
+that the receipt still needs uploading in the dashboard; tapping Cancel
+cancels the booking immediately and frees the car's time range.
+
+**One-time setup:**
+
+1. **Create the bot.** Message [@BotFather](https://t.me/BotFather) on
+   Telegram → `/newbot` → follow the prompts → copy the token it gives you
+   into `TELEGRAM_BOT_TOKEN`.
+2. **Get your chat ID.** Message
+   [@userinfobot](https://t.me/userinfobot) → it replies with your numeric
+   id → put that in `TELEGRAM_ADMIN_CHAT_ID`. (Then message your own new
+   bot at least once — Telegram won't deliver messages to a chat that's
+   never been opened.)
+3. **Set the remaining env vars:** `TELEGRAM_WEBHOOK_SECRET` (any long
+   random string, same way as `JWT_SECRET`) and `AGENT_SWEEP_SECRET`
+   (another random string). Deploy the backend with all four set.
+4. **Register the webhook** — run this once, pointing at your deployed
+   backend:
+   ```bash
+   node scripts/registerTelegramWebhook.js https://your-backend.onrender.com
+   ```
+   Re-run it any time the backend's URL or `TELEGRAM_WEBHOOK_SECRET`
+   changes.
+5. **Schedule the sweep.** Render's free tier sleeps an idle service, so
+   an in-process timer isn't reliable — instead, use a free external
+   pinger like [cron-job.org](https://cron-job.org) to call this every
+   ~15 minutes:
+   ```
+   POST https://your-backend.onrender.com/api/agent/sweep
+   Header: X-Agent-Secret: <your AGENT_SWEEP_SECRET>
+   ```
+
+**Endpoints involved:**
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST | `/api/agent/sweep` | Triggers a sweep for stale-pending bookings (needs `X-Agent-Secret` header) |
+| POST | `/api/telegram/webhook` | Receives button taps from Telegram (needs a valid `secret_token`, set automatically by the registration script) |
+
+A booking is only ever notified once (`agent_notified_at` guards this), and
+a tap is only ever actioned once (`agent_decision` guards this) — retries
+from either Telegram or the cron pinger are safe.

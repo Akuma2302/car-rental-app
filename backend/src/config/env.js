@@ -33,6 +33,23 @@ const env = {
   // below this, the half-day rate; at or above, the daily rate (per day).
   halfDayThresholdHours: parseInt(process.env.HALF_DAY_THRESHOLD_HOURS || '12', 10),
   fullDayThresholdHours: parseInt(process.env.FULL_DAY_THRESHOLD_HOURS || '24', 10),
+
+  // AI Agent (Telegram): follows up with the admin on bookings still
+  // "pending" too long. Create a bot via @BotFather, then message
+  // @userinfobot to get your own numeric chat ID — see backend/README.md
+  // "AI Agent" section for the full one-time setup.
+  telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || '',
+  telegramAdminChatId: process.env.TELEGRAM_ADMIN_CHAT_ID || '',
+  // Checked against the X-Telegram-Bot-Api-Secret-Token header Telegram
+  // sends with every webhook call, so random requests to the webhook URL
+  // can't spoof a button tap. Set via the setWebhook call in the
+  // registration script, not by Telegram itself.
+  telegramWebhookSecret: process.env.TELEGRAM_WEBHOOK_SECRET || '',
+  // How long a booking can sit "pending" before the agent pings the admin.
+  agentPendingHours: parseInt(process.env.AGENT_PENDING_HOURS || '4', 10),
+  // Shared secret an external cron job (e.g. cron-job.org) must send to
+  // trigger a sweep — without this, POST /api/agent/sweep is refused.
+  agentSweepSecret: process.env.AGENT_SWEEP_SECRET || '',
 };
 
 module.exports = env;
