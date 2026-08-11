@@ -1,10 +1,14 @@
 import { siteConfig } from '../utils/siteConfig.js';
 import Button from './Button.jsx';
+import { CarGlyph } from './icons.jsx';
 
 function Hero() {
   return (
     <section className="hero" id="top">
       <div className="hero-glow" />
+      <div className="hero-car">
+        <CarGlyph tint="#f5a623" />
+      </div>
       <div className="hero-inner">
         <h1>
           Pick a car.

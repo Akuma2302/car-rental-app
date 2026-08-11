@@ -254,10 +254,27 @@ h3 {
 /* ===================== HERO ===================== */
 .hero {
   position: relative;
-  background: linear-gradient(160deg, var(--ink) 0%, var(--dusk) 100%);
+  background:
+    linear-gradient(100deg, rgba(15, 27, 46, 0.97) 0%, rgba(15, 27, 46, 0.92) 30%, rgba(15, 27, 46, 0.55) 62%, rgba(15, 27, 46, 0.28) 100%),
+    url('https://images.unsplash.com/photo-1764866557865-1f4e4060211f?auto=format&fit=crop&w=2200&q=70') center 30% / cover no-repeat;
   color: #fff;
   overflow: hidden;
   padding: 96px 0 0;
+}
+.hero-car {
+  position: absolute;
+  right: -40px;
+  bottom: 64px;
+  width: min(38vw, 460px);
+  z-index: 1;
+  opacity: 0.9;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+}
+@media (max-width: 900px) {
+  .hero-car {
+    display: none;
+  }
 }
 .hero-inner {
   max-width: var(--container);
