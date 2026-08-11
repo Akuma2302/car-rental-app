@@ -3,6 +3,7 @@ const bookingRepository = require('../repositories/bookingRepository');
 const { calculatePrice, describeDuration } = require('./pricingService');
 const { buildWhatsappLink } = require('../utils/whatsapp');
 const receiptService = require('./receiptService');
+const telegramService = require('./telegramService');
 
 const POSTGRES_EXCLUSION_VIOLATION = '23P01';
 
@@ -68,6 +69,20 @@ const bookingService = {
         throw conflict;
       }
       throw err;
+    }
+
+    // Alert the admin on Telegram right away instead of waiting for the
+    // next scheduled sweep (which only catches bookings AGENT_PENDING_HOURS
+    // or older). Marking it notified here means the sweep won't message
+    // about it again later — this call already covers that. A failure here
+    // must never fail the booking itself, so it's caught and logged rather
+    // than thrown; the sweep will still pick it up later as a fallback,
+    // since agent_notified_at is only set on success below.
+    try {
+      const message = await telegramService.sendPendingBookingAlert({ ...booking, carName: car.name });
+      await bookingRepository.markAgentNotified(booking.id, String(message.message_id));
+    } catch (err) {
+      console.error(`Failed to send immediate Telegram alert for booking ${booking.id}:`, err.message);
     }
 
     const whatsappUrl = buildWhatsappLink({

@@ -43,15 +43,16 @@ const telegramService = {
    */
   async sendPendingBookingAlert(booking) {
     const text = [
-      `⏳ *Pending booking needs a decision*`,
+      `⏳ *New booking — needs a decision*`,
       '',
       `Car: ${booking.carName}`,
       `Customer: ${booking.customerName} (${booking.customerPhone})`,
       `Pick-up: ${formatDateTime(booking.startAt)}`,
       `Return: ${formatDateTime(booking.endAt)}`,
       `Total: RM${booking.totalPrice}`,
+      `Booked: ${formatDateTime(booking.createdAt)}`,
       '',
-      `This has been pending for ${env.agentPendingHours}+ hours — has the customer paid?`,
+      `Confirm once you've received payment, or cancel if you haven't.`,
     ].join('\n');
 
     return callTelegram('sendMessage', {

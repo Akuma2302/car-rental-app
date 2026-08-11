@@ -270,11 +270,18 @@ assuming a fresh install. This runs automatically on every server start.
 
 ## AI Agent (Telegram)
 
-If a booking sits `pending` for `AGENT_PENDING_HOURS` (default 4) without
-the admin uploading a receipt, the agent messages the admin on Telegram
-with **Confirm** / **Cancel** buttons. Tapping Confirm just leaves a note
-that the receipt still needs uploading in the dashboard; tapping Cancel
-cancels the booking immediately and frees the car's time range.
+As soon as a booking is created, the admin gets pinged on Telegram with
+**Confirm** / **Cancel** buttons — no need to wait for it to go stale.
+Tapping Confirm just leaves a note that the receipt still needs uploading
+in the dashboard; tapping Cancel cancels the booking immediately and frees
+the car's time range.
+
+The scheduled sweep (`POST /api/agent/sweep`, still described below) acts
+as a fallback: if the immediate notification ever fails (e.g. a transient
+Telegram outage), any booking still `pending` after `AGENT_PENDING_HOURS`
+(default 4) and not yet notified gets picked up and notified there
+instead. In normal operation it should find nothing, since every booking
+is notified immediately on creation.
 
 **One-time setup:**
 
