@@ -24,6 +24,31 @@ export function CarGlyph({ tint = '#d88f22' }) {
   );
 }
 
+export function SeatIcon(props) {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M6 4v9a2 2 0 0 0 2 2h4M6 13H4a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h1M18 20v-5a2 2 0 0 0-2-2h-4M20 20h-2v-3a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1Z" />
+    </svg>
+  );
+}
+
+export function GearIcon(props) {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 3v3M12 18v3M4.2 7.5l2.6 1.5M17.2 15l2.6 1.5M4.2 16.5l2.6-1.5M17.2 9l2.6-1.5" />
+    </svg>
+  );
+}
+
+export function FuelIcon(props) {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M3 22V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 10h9M16 8l3 2v6a1.5 1.5 0 0 0 3 0V9a2 2 0 0 0-.6-1.4L18.5 5" />
+    </svg>
+  );
+}
+
 export function ClockIcon(props) {
   return (
     <svg

@@ -2,12 +2,7 @@ const TRANSMISSIONS = ['Automatic', 'Manual'];
 const FUEL_TYPES = ['Petrol', 'Diesel', 'Hybrid', 'EV'];
 const SEATS = [5, 7];
 const CATEGORIES = ['SUV', 'Sedan', 'Luxury'];
-const PRICE_BANDS = [
-  { label: 'Any price', value: '' },
-  { label: 'Under RM100/day', value: '100' },
-  { label: 'Under RM200/day', value: '200' },
-  { label: 'Under RM300/day', value: '300' },
-];
+const MAX_PRICE = 500;
 
 export const DEFAULT_FILTERS = {
   transmission: '',
@@ -17,95 +12,99 @@ export const DEFAULT_FILTERS = {
   maxPricePerDay: '',
 };
 
+// Renders as checkboxes to match the reference layout, but behaves as a
+// single-select per group (matching the underlying filter fields, which
+// each hold one value) — checking one option unchecks any other in the
+// same group, and re-checking the active one clears back to "All".
+function FilterGroup({ title, options, activeValue, onSelect }) {
+  return (
+    <div className="filter-group">
+      <h4>{title}</h4>
+      <label className="filter-checkbox">
+        <input type="checkbox" checked={!activeValue} onChange={() => onSelect('')} />
+        <span>All{title === 'Vehicle Type' ? ' Types' : ''}</span>
+      </label>
+      {options.map((opt) => (
+        <label className="filter-checkbox" key={opt}>
+          <input
+            type="checkbox"
+            checked={String(activeValue) === String(opt)}
+            onChange={() => onSelect(String(activeValue) === String(opt) ? '' : opt)}
+          />
+          <span>{typeof opt === 'number' ? `${opt} seats` : opt}</span>
+        </label>
+      ))}
+    </div>
+  );
+}
+
 function FiltersBar({ filters, onChange, resultCount }) {
   function update(key, value) {
     onChange({ ...filters, [key]: value });
   }
 
   const activeCount = Object.values(filters).filter(Boolean).length;
+  const sliderValue = filters.maxPricePerDay ? Number(filters.maxPricePerDay) : MAX_PRICE;
 
   return (
-    <div className="filters-bar">
-      <div className="filters-row">
-        <select
-          className="filter-select"
-          value={filters.transmission}
-          onChange={(e) => update('transmission', e.target.value)}
-          aria-label="Transmission"
-        >
-          <option value="">Any transmission</option>
-          {TRANSMISSIONS.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-
-        <select
-          className="filter-select"
-          value={filters.fuelType}
-          onChange={(e) => update('fuelType', e.target.value)}
-          aria-label="Fuel type"
-        >
-          <option value="">Any fuel type</option>
-          {FUEL_TYPES.map((f) => (
-            <option key={f} value={f}>
-              {f}
-            </option>
-          ))}
-        </select>
-
-        <select
-          className="filter-select"
-          value={filters.seats}
-          onChange={(e) => update('seats', e.target.value)}
-          aria-label="Seats"
-        >
-          <option value="">Any seats</option>
-          {SEATS.map((s) => (
-            <option key={s} value={s}>
-              {s} seats
-            </option>
-          ))}
-        </select>
-
-        <select
-          className="filter-select"
-          value={filters.category}
-          onChange={(e) => update('category', e.target.value)}
-          aria-label="Category"
-        >
-          <option value="">Any category</option>
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-
-        <select
-          className="filter-select"
-          value={filters.maxPricePerDay}
-          onChange={(e) => update('maxPricePerDay', e.target.value)}
-          aria-label="Price range"
-        >
-          {PRICE_BANDS.map((b) => (
-            <option key={b.value} value={b.value}>
-              {b.label}
-            </option>
-          ))}
-        </select>
-
+    <aside className="filters-sidebar">
+      <div className="filters-sidebar-head">
+        <h3>Filter</h3>
         {activeCount > 0 && (
           <button type="button" className="filters-clear" onClick={() => onChange(DEFAULT_FILTERS)}>
-            Clear filters
+            Clear All
           </button>
         )}
       </div>
+
+      <FilterGroup
+        title="Vehicle Type"
+        options={CATEGORIES}
+        activeValue={filters.category}
+        onSelect={(v) => update('category', v)}
+      />
+
+      <div className="filter-group">
+        <h4>Price Range (per day)</h4>
+        <input
+          type="range"
+          min="0"
+          max={MAX_PRICE}
+          step="10"
+          value={sliderValue}
+          onChange={(e) => {
+            const next = Number(e.target.value);
+            update('maxPricePerDay', next >= MAX_PRICE ? '' : String(next));
+          }}
+          className="price-slider"
+          aria-label="Maximum price per day"
+        />
+        <div className="price-slider-labels">
+          <span>RM0</span>
+          <span>{filters.maxPricePerDay ? `Up to RM${filters.maxPricePerDay}` : `RM${MAX_PRICE}+`}</span>
+        </div>
+      </div>
+
+      <FilterGroup
+        title="Transmission"
+        options={TRANSMISSIONS}
+        activeValue={filters.transmission}
+        onSelect={(v) => update('transmission', v)}
+      />
+
+      <FilterGroup
+        title="Fuel Type"
+        options={FUEL_TYPES}
+        activeValue={filters.fuelType}
+        onSelect={(v) => update('fuelType', v)}
+      />
+
+      <FilterGroup title="Seats" options={SEATS} activeValue={filters.seats} onSelect={(v) => update('seats', v)} />
+
       <span className="filters-count">
-        {resultCount} car{resultCount === 1 ? '' : 's'} match
+        {resultCount} car{resultCount === 1 ? '' : 's'} available
       </span>
-    </div>
+    </aside>
   );
 }
 

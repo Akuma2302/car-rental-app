@@ -41,19 +41,25 @@ function CarsSection({ cars, loading, error }) {
         )}
 
         {!loading && !error && (
-          <>
+          <div className="cars-layout">
             <FiltersBar filters={filters} onChange={setFilters} resultCount={filteredCars.length} />
 
-            {filteredCars.length === 0 ? (
-              <p className="state-message">No cars match those filters — try widening your search.</p>
-            ) : (
-              <div className="car-grid">
-                {filteredCars.map((car) => (
-                  <CarCard key={car.id} car={car} onCheckAvailability={openBooking} />
-                ))}
+            <div className="cars-list-col">
+              <div className="cars-list-head">
+                <span>{filteredCars.length} Cars Available</span>
               </div>
-            )}
-          </>
+
+              {filteredCars.length === 0 ? (
+                <p className="state-message">No cars match those filters — try widening your search.</p>
+              ) : (
+                <div className="car-list">
+                  {filteredCars.map((car) => (
+                    <CarCard key={car.id} car={car} onCheckAvailability={openBooking} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </div>
     </section>

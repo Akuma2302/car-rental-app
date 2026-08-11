@@ -1,44 +1,41 @@
 import Button from './Button.jsx';
 import ImageCarousel from './ImageCarousel.jsx';
+import { SeatIcon, GearIcon, FuelIcon } from './icons.jsx';
 
 function CarCard({ car, onCheckAvailability }) {
   return (
-    <div className="car-card">
-      <ImageCarousel images={car.images} altText={car.name} accent={car.accent} />
+    <div className="car-row">
+      <div className="car-row-media">
+        <ImageCarousel images={car.images} altText={car.name} accent={car.accent} />
+      </div>
 
-      <div className="car-body">
-        <div className="car-badges">
-          <span className="badge">{car.category}</span>
-          <span className="badge">{car.fuelType}</span>
-          <span className="badge">{car.transmission}</span>
-          <span className="badge">{car.seats} seats</span>
-        </div>
-
+      <div className="car-row-body">
         <h3>{car.name}</h3>
-        <div className="car-meta">
-          <span>{car.tagline}</span>
+        <p className="car-row-tagline">{car.tagline}</p>
+        <div className="car-row-specs">
+          <span>
+            <SeatIcon /> {car.seats} Seats
+          </span>
+          <span>
+            <GearIcon /> {car.transmission}
+          </span>
+          <span>
+            <FuelIcon /> {car.fuelType}
+          </span>
         </div>
+      </div>
 
-        <div className="car-pricing">
-          <div className="price-tier">
-            <b>RM{car.pricePerHour}</b>
-            <span>/hour</span>
-          </div>
-          <div className="price-tier">
-            <b>RM{car.pricePerHalfDay}</b>
-            <span>/half-day</span>
-          </div>
-          <div className="price-tier price-tier-main">
-            <b>RM{car.pricePerDay}</b>
-            <span>/day</span>
-          </div>
+      <div className="car-row-price">
+        <div className="car-row-price-main">
+          <b>RM{car.pricePerDay}</b>
+          <span>/day</span>
         </div>
-
-        <div className="car-foot">
-          <Button className="car-check-btn btn-block" onClick={() => onCheckAvailability(car.id)}>
-            Check availability
-          </Button>
+        <div className="car-row-price-sub">
+          RM{car.pricePerHalfDay} half-day · RM{car.pricePerHour}/hr
         </div>
+        <Button className="car-check-btn" onClick={() => onCheckAvailability(car.id)}>
+          Check availability
+        </Button>
       </div>
     </div>
   );
