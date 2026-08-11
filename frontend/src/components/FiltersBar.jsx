@@ -38,7 +38,7 @@ function FilterGroup({ title, options, activeValue, onSelect }) {
   );
 }
 
-function FiltersBar({ filters, onChange, resultCount }) {
+function FiltersBar({ filters, onChange, resultCount, mobileOpen }) {
   function update(key, value) {
     onChange({ ...filters, [key]: value });
   }
@@ -47,7 +47,7 @@ function FiltersBar({ filters, onChange, resultCount }) {
   const sliderValue = filters.maxPricePerDay ? Number(filters.maxPricePerDay) : MAX_PRICE;
 
   return (
-    <aside className="filters-sidebar">
+    <aside className={`filters-sidebar${mobileOpen ? ' mobile-open' : ''}`}>
       <div className="filters-sidebar-head">
         <h3>Filter</h3>
         {activeCount > 0 && (

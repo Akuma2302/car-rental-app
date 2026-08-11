@@ -18,6 +18,7 @@ function applyFilters(cars, filters) {
 function CarsSection({ cars, loading, error }) {
   const { openBooking } = useBookingContext();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const filteredCars = useMemo(() => applyFilters(cars, filters), [cars, filters]);
 
@@ -42,11 +43,24 @@ function CarsSection({ cars, loading, error }) {
 
         {!loading && !error && (
           <div className="cars-layout">
-            <FiltersBar filters={filters} onChange={setFilters} resultCount={filteredCars.length} />
+            <FiltersBar
+              filters={filters}
+              onChange={setFilters}
+              resultCount={filteredCars.length}
+              mobileOpen={mobileFiltersOpen}
+            />
 
             <div className="cars-list-col">
               <div className="cars-list-head">
                 <span>{filteredCars.length} Cars Available</span>
+                <button
+                  type="button"
+                  className="filters-toggle-mobile"
+                  onClick={() => setMobileFiltersOpen((v) => !v)}
+                  aria-expanded={mobileFiltersOpen}
+                >
+                  ☰ Filters
+                </button>
               </div>
 
               {filteredCars.length === 0 ? (
