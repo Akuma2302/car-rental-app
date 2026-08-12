@@ -4,8 +4,10 @@ import AnimatedHeading from './AnimatedHeading.jsx';
 import FadeIn from './FadeIn.jsx';
 
 // Free-to-use stock footage (Pexels License — free for commercial use, no
-// attribution required): https://www.pexels.com/video/a-car-driving-on-a-highway-at-night-19653393/
-const HERO_VIDEO_URL = 'https://videos.pexels.com/video-files/19653393/19653393-uhd_1440_2560_30fps.mp4';
+// attribution required): https://www.pexels.com/video/driving-at-night-in-a-highway-5938339/
+// Native 1920x1080 landscape — avoids the heavy upscale/crop that a portrait
+// source gets under object-fit: cover on a wide hero.
+const HERO_VIDEO_URL = 'https://videos.pexels.com/video-files/5938339/5938339-hd_1920_1080_25fps.mp4';
 
 function Hero() {
   return (
