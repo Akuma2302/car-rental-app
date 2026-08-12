@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import SectionHeading from './SectionHeading.jsx';
 import CarCard from './CarCard.jsx';
 import FiltersBar, { DEFAULT_FILTERS } from './FiltersBar.jsx';
@@ -15,12 +15,38 @@ function applyFilters(cars, filters) {
   });
 }
 
+const PAGE_SIZE = 5;
+
 function CarsSection({ cars, loading, error }) {
   const { openBooking } = useBookingContext();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const listTopRef = useRef(null);
+  const isFirstRender = useRef(true);
 
   const filteredCars = useMemo(() => applyFilters(cars, filters), [cars, filters]);
+  const totalPages = Math.max(1, Math.ceil(filteredCars.length / PAGE_SIZE));
+  const pagedCars = filteredCars.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+
+  // Filtering can change which page even makes sense (e.g. fewer results
+  // than the page you were on) — always land back on page 1 when the
+  // filtered set changes.
+  useEffect(() => {
+    setPage(0);
+  }, [filters]);
+
+  // Jumping to a new page can leave the newly-shown cards below the
+  // viewport if the user had scrolled down — bring the list header back
+  // into view, but skip this on first render so the page doesn't jump on
+  // initial load.
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [page]);
 
   useEffect(() => {
     if (!mobileFiltersOpen) return undefined;
@@ -69,7 +95,7 @@ function CarsSection({ cars, loading, error }) {
             />
 
             <div className="cars-list-col">
-              <div className="cars-list-head">
+              <div className="cars-list-head" ref={listTopRef}>
                 <span>{filteredCars.length} Cars Available</span>
                 <button
                   type="button"
@@ -84,11 +110,37 @@ function CarsSection({ cars, loading, error }) {
               {filteredCars.length === 0 ? (
                 <p className="state-message">No cars match those filters — try widening your search.</p>
               ) : (
-                <div className="car-list">
-                  {filteredCars.map((car) => (
-                    <CarCard key={car.id} car={car} onCheckAvailability={openBooking} />
-                  ))}
-                </div>
+                <>
+                  <div className="car-list">
+                    {pagedCars.map((car) => (
+                      <CarCard key={car.id} car={car} onCheckAvailability={openBooking} />
+                    ))}
+                  </div>
+
+                  {totalPages > 1 && (
+                    <div className="cars-pagination">
+                      <button
+                        type="button"
+                        className="pagination-btn"
+                        onClick={() => setPage((p) => Math.max(0, p - 1))}
+                        disabled={page === 0}
+                      >
+                        ‹ Prev
+                      </button>
+                      <span className="pagination-status">
+                        Page {page + 1} of {totalPages}
+                      </span>
+                      <button
+                        type="button"
+                        className="pagination-btn"
+                        onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                        disabled={page >= totalPages - 1}
+                      >
+                        Next ›
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
