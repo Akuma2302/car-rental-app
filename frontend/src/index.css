@@ -1286,5 +1286,5 @@ h3 {
 }
 .reveal.in {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
