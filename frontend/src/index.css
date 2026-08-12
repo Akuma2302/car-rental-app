@@ -517,23 +517,14 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding-bottom: 14px;
   margin-bottom: 16px;
+  border-bottom: 1px solid var(--line);
 }
 .filters-sidebar-head-actions {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-@media (max-width: 860px) {
-  .filters-sidebar.mobile-open .filters-sidebar-head {
-    position: sticky;
-    top: 0;
-    background: var(--card);
-    padding: 20px 20px 14px;
-    margin: -20px -20px 4px;
-    border-bottom: 1px solid var(--line);
-    z-index: 1;
-  }
 }
 .filters-sidebar-head h3 {
   font-size: 1.05rem;
