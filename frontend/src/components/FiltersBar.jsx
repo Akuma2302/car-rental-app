@@ -62,53 +62,55 @@ function FiltersBar({ filters, onChange, resultCount, mobileOpen, onClose }) {
         </div>
       </div>
 
-      <FilterGroup
-        title="Vehicle Type"
-        options={CATEGORIES}
-        activeValue={filters.category}
-        onSelect={(v) => update('category', v)}
-      />
-
-      <div className="filter-group">
-        <h4>Price Range (per day)</h4>
-        <input
-          type="range"
-          min="0"
-          max={MAX_PRICE}
-          step="10"
-          value={sliderValue}
-          onChange={(e) => {
-            const next = Number(e.target.value);
-            update('maxPricePerDay', next >= MAX_PRICE ? '' : String(next));
-          }}
-          className="price-slider"
-          aria-label="Maximum price per day"
+      <div className="filters-sidebar-body">
+        <FilterGroup
+          title="Vehicle Type"
+          options={CATEGORIES}
+          activeValue={filters.category}
+          onSelect={(v) => update('category', v)}
         />
-        <div className="price-slider-labels">
-          <span>RM0</span>
-          <span>{filters.maxPricePerDay ? `Up to RM${filters.maxPricePerDay}` : `RM${MAX_PRICE}+`}</span>
+
+        <div className="filter-group">
+          <h4>Price Range (per day)</h4>
+          <input
+            type="range"
+            min="0"
+            max={MAX_PRICE}
+            step="10"
+            value={sliderValue}
+            onChange={(e) => {
+              const next = Number(e.target.value);
+              update('maxPricePerDay', next >= MAX_PRICE ? '' : String(next));
+            }}
+            className="price-slider"
+            aria-label="Maximum price per day"
+          />
+          <div className="price-slider-labels">
+            <span>RM0</span>
+            <span>{filters.maxPricePerDay ? `Up to RM${filters.maxPricePerDay}` : `RM${MAX_PRICE}+`}</span>
+          </div>
         </div>
+
+        <FilterGroup
+          title="Transmission"
+          options={TRANSMISSIONS}
+          activeValue={filters.transmission}
+          onSelect={(v) => update('transmission', v)}
+        />
+
+        <FilterGroup
+          title="Fuel Type"
+          options={FUEL_TYPES}
+          activeValue={filters.fuelType}
+          onSelect={(v) => update('fuelType', v)}
+        />
+
+        <FilterGroup title="Seats" options={SEATS} activeValue={filters.seats} onSelect={(v) => update('seats', v)} />
+
+        <span className="filters-count">
+          {resultCount} car{resultCount === 1 ? '' : 's'} available
+        </span>
       </div>
-
-      <FilterGroup
-        title="Transmission"
-        options={TRANSMISSIONS}
-        activeValue={filters.transmission}
-        onSelect={(v) => update('transmission', v)}
-      />
-
-      <FilterGroup
-        title="Fuel Type"
-        options={FUEL_TYPES}
-        activeValue={filters.fuelType}
-        onSelect={(v) => update('fuelType', v)}
-      />
-
-      <FilterGroup title="Seats" options={SEATS} activeValue={filters.seats} onSelect={(v) => update('seats', v)} />
-
-      <span className="filters-count">
-        {resultCount} car{resultCount === 1 ? '' : 's'} available
-      </span>
     </aside>
   );
 }
