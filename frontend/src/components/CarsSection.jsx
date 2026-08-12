@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import SectionHeading from './SectionHeading.jsx';
 import CarCard from './CarCard.jsx';
 import FiltersBar, { DEFAULT_FILTERS } from './FiltersBar.jsx';
@@ -22,6 +22,20 @@ function CarsSection({ cars, loading, error }) {
 
   const filteredCars = useMemo(() => applyFilters(cars, filters), [cars, filters]);
 
+  useEffect(() => {
+    if (!mobileFiltersOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    function handleKey(e) {
+      if (e.key === 'Escape') setMobileFiltersOpen(false);
+    }
+    window.addEventListener('keydown', handleKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKey);
+    };
+  }, [mobileFiltersOpen]);
+
   return (
     <section className="cars reveal" id="cars">
       <div className="container">
@@ -43,11 +57,15 @@ function CarsSection({ cars, loading, error }) {
 
         {!loading && !error && (
           <div className="cars-layout">
+            {mobileFiltersOpen && (
+              <div className="filters-backdrop" onClick={() => setMobileFiltersOpen(false)} />
+            )}
             <FiltersBar
               filters={filters}
               onChange={setFilters}
               resultCount={filteredCars.length}
               mobileOpen={mobileFiltersOpen}
+              onClose={() => setMobileFiltersOpen(false)}
             />
 
             <div className="cars-list-col">

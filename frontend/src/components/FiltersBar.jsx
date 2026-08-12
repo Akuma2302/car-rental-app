@@ -38,7 +38,7 @@ function FilterGroup({ title, options, activeValue, onSelect }) {
   );
 }
 
-function FiltersBar({ filters, onChange, resultCount, mobileOpen }) {
+function FiltersBar({ filters, onChange, resultCount, mobileOpen, onClose }) {
   function update(key, value) {
     onChange({ ...filters, [key]: value });
   }
@@ -50,11 +50,16 @@ function FiltersBar({ filters, onChange, resultCount, mobileOpen }) {
     <aside className={`filters-sidebar${mobileOpen ? ' mobile-open' : ''}`}>
       <div className="filters-sidebar-head">
         <h3>Filter</h3>
-        {activeCount > 0 && (
-          <button type="button" className="filters-clear" onClick={() => onChange(DEFAULT_FILTERS)}>
-            Clear All
+        <div className="filters-sidebar-head-actions">
+          {activeCount > 0 && (
+            <button type="button" className="filters-clear" onClick={() => onChange(DEFAULT_FILTERS)}>
+              Clear All
+            </button>
+          )}
+          <button type="button" className="filters-close-mobile" onClick={onClose} aria-label="Close filters">
+            ×
           </button>
-        )}
+        </div>
       </div>
 
       <FilterGroup

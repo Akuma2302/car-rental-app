@@ -1,7 +1,7 @@
 // Inline SVG icons as components (rather than image assets) so things like
 // CarGlyph can take a dynamic per-car tint color as a prop.
 
-export function CarGlyph({ tint = '#d88f22' }) {
+export function CarGlyph({ tint = '#dc8f13' }) {
   return (
     <svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
       <path

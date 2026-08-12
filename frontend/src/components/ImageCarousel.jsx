@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CarGlyph } from './icons.jsx';
 
-const TINTS = { amber: '#d88f22', jade: '#2e8b79', dusk: '#3a4368' };
+const TINTS = { amber: '#dc8f13', jade: '#16a34a', dusk: '#16233b' };
 
 function ImageCarousel({ images, altText, accent }) {
   const [index, setIndex] = useState(0);
