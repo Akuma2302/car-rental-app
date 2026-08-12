@@ -464,23 +464,27 @@ h3 {
   .filters-sidebar.mobile-open {
     display: block;
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    top: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% - 40px);
+    max-width: 420px;
     max-height: 85vh;
-    border-radius: 20px 20px 0 0;
+    border-radius: var(--radius-lg);
     overflow-y: auto;
     z-index: 210;
     box-shadow: var(--shadow-modal);
     -webkit-overflow-scrolling: touch;
+    animation: modalIn 0.22s ease;
   }
   .filters-backdrop {
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(15, 27, 46, 0.55);
+    background: rgba(15, 27, 46, 0.6);
+    backdrop-filter: blur(3px);
     z-index: 200;
+    animation: overlayIn 0.2s ease;
   }
   .filters-close-mobile {
     display: inline-flex;
