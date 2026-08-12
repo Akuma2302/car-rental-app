@@ -6,7 +6,7 @@ function Header() {
 
   return (
     <header className="nav">
-      <div className="nav-inner">
+      <div className="nav-inner liquid-glass">
         <div className="logo">
           <span className="logo-dot" />
           {siteConfig.businessName}
@@ -21,6 +21,9 @@ function Header() {
         <div className="nav-right">
           <a className="nav-call" href={siteConfig.phoneHref}>
             {siteConfig.phoneDisplay}
+          </a>
+          <a className="btn btn-primary btn-sm nav-cta" href="#cars">
+            Book Now
           </a>
           <button
             type="button"
