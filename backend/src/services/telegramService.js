@@ -12,6 +12,14 @@ function formatDateTime(iso) {
   });
 }
 
+/** Converts a local Malaysian number (e.g. "012-345 6789") into the
+ * digits-only, country-code-prefixed form wa.me links expect. */
+function toWhatsappDigits(phone) {
+  const digits = (phone || '').replace(/\D/g, '');
+  if (!digits) return '';
+  return digits.startsWith('0') ? `60${digits.slice(1)}` : digits;
+}
+
 async function callTelegram(method, payload) {
   if (!env.telegramBotToken) {
     const err = new Error('TELEGRAM_BOT_TOKEN is not configured');
@@ -46,7 +54,7 @@ const telegramService = {
       `⏳ *New booking — needs a decision*`,
       '',
       `Car: ${booking.carName}`,
-      `Customer: ${booking.customerName} (${booking.customerPhone})`,
+      `Customer: ${booking.customerName} ([${booking.customerPhone}](https://wa.me/${toWhatsappDigits(booking.customerPhone)}))`,
       `IC: ${booking.customerIc}`,
       `Address: ${booking.customerAddress}, ${booking.customerPostcode} ${booking.customerCity}, ${booking.customerState}`,
       `Pick-up: ${formatDateTime(booking.startAt)}`,

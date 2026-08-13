@@ -44,9 +44,9 @@ function buildWhatsappLink({
     `IC: ${customerIc}`,
     `Address: ${customerAddress}, ${customerPostcode} ${customerCity}, ${customerState}`,
     '',
-    'Please arrange payment with us here, then confirm on the website:',
-    resumeLink,
-    '(That link also lets you cancel this booking if needed.)',
+    "We'll connect with you shortly to confirm — stay tuned!",
+    '',
+    `View or cancel this booking anytime: ${resumeLink}`,
     '',
     '(Sent via website booking form)',
   ].join('\n');
