@@ -26,7 +26,7 @@ export function getDurationBand(startAt, endAt) {
   return 'xlong';
 }
 
-function BookingsFilters({ filters, onChange, cars, resultCount, confirmedRevenue }) {
+function BookingsFilters({ filters, onChange, cars }) {
   function update(key, value) {
     onChange({ ...filters, [key]: value });
   }
@@ -120,10 +120,6 @@ function BookingsFilters({ filters, onChange, cars, resultCount, confirmedRevenu
           </button>
         )}
       </div>
-
-      <span className="panel-count">
-        {resultCount} booking{resultCount === 1 ? '' : 's'} · RM{confirmedRevenue} confirmed
-      </span>
     </div>
   );
 }

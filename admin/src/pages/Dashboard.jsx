@@ -4,50 +4,69 @@ import { businessName } from '../utils/siteConfig.js';
 import DashboardPanel from '../components/DashboardPanel.jsx';
 import BookingsPanel from '../components/BookingsPanel.jsx';
 import CarsPanel from '../components/CarsPanel.jsx';
+import { GridIcon, CalendarIcon, CarIcon, LogoutIcon } from '../components/icons.jsx';
 
 const TABS = [
-  { key: 'dashboard', label: 'Dashboard' },
-  { key: 'bookings', label: 'Bookings' },
-  { key: 'cars', label: 'Cars' },
+  { key: 'dashboard', icon: GridIcon, label: 'Dashboard', subtitle: 'Overview of your fleet and bookings' },
+  { key: 'bookings', icon: CalendarIcon, label: 'Bookings', subtitle: 'Manage and monitor all car rental bookings' },
+  { key: 'cars', icon: CarIcon, label: 'Cars', subtitle: 'Manage your fleet listings and availability' },
 ];
 
 function Dashboard() {
   const { username, logout } = useAuth();
   const [tab, setTab] = useState('dashboard');
+  const active = TABS.find((t) => t.key === tab);
 
   return (
-    <div className="dashboard">
-      <header className="dash-header">
-        <div className="dash-title">
+    <div className="admin-shell">
+      <aside className="admin-sidebar">
+        <div className="admin-sidebar-logo">
           <span className="logo-dot" />
-          {businessName} Admin
+          {businessName}
+          <span className="admin-sidebar-logo-tag">ADMIN</span>
         </div>
-        <div className="dash-user">
-          <span>Signed in as {username}</span>
-          <button className="btn btn-outline btn-sm" onClick={logout}>
+
+        <nav className="admin-nav">
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              className={`admin-nav-item${tab === t.key ? ' active' : ''}`}
+              onClick={() => setTab(t.key)}
+            >
+              <t.icon />
+              {t.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="admin-sidebar-footer">
+          <div className="admin-user-chip">
+            <span className="admin-user-avatar">{username?.[0]?.toUpperCase() || 'A'}</span>
+            <div>
+              <div className="admin-user-name">{username}</div>
+              <div className="admin-user-role">Administrator</div>
+            </div>
+          </div>
+          <button type="button" className="admin-logout-btn" onClick={logout}>
+            <LogoutIcon width={16} height={16} />
             Log out
           </button>
         </div>
-      </header>
+      </aside>
 
-      <nav className="dash-tabs">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            className={`dash-tab${tab === t.key ? ' active' : ''}`}
-            onClick={() => setTab(t.key)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </nav>
+      <div className="admin-main">
+        <header className="admin-topbar">
+          <h1>{active.label}</h1>
+          <p>{active.subtitle}</p>
+        </header>
 
-      <main className="dash-content">
-        {tab === 'dashboard' && <DashboardPanel />}
-        {tab === 'bookings' && <BookingsPanel />}
-        {tab === 'cars' && <CarsPanel />}
-      </main>
+        <main className="admin-content">
+          {tab === 'dashboard' && <DashboardPanel />}
+          {tab === 'bookings' && <BookingsPanel />}
+          {tab === 'cars' && <CarsPanel />}
+        </main>
+      </div>
     </div>
   );
 }

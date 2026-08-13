@@ -40,7 +40,18 @@ const bookingService = {
    * range really is free — closes the race condition an application-level
    * "check, then write" approach would have under concurrent requests.
    */
-  async createBookingWithNotification({ carId, startAt, endAt, customerName, customerPhone }) {
+  async createBookingWithNotification({
+    carId,
+    startAt,
+    endAt,
+    customerName,
+    customerPhone,
+    customerIc,
+    customerAddress,
+    customerPostcode,
+    customerCity,
+    customerState,
+  }) {
     const car = await carRepository.findById(carId);
     if (!car) {
       const err = new Error('Car not found');
@@ -59,6 +70,11 @@ const bookingService = {
         totalPrice,
         customerName,
         customerPhone,
+        customerIc,
+        customerAddress,
+        customerPostcode,
+        customerCity,
+        customerState,
       });
     } catch (err) {
       if (err.code === POSTGRES_EXCLUSION_VIOLATION) {
@@ -92,6 +108,11 @@ const bookingService = {
       totalPrice,
       customerName,
       customerPhone,
+      customerIc,
+      customerAddress,
+      customerPostcode,
+      customerCity,
+      customerState,
       bookingId: booking.id,
     });
 

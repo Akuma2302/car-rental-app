@@ -16,7 +16,20 @@ function formatDateTime(iso) {
  * This is the zero-cost, no-API-approval way to get a booking "sent" to
  * WhatsApp: the customer's own tap-to-send delivers the message.
  */
-function buildWhatsappLink({ car, startAt, endAt, totalPrice, customerName, customerPhone, bookingId }) {
+function buildWhatsappLink({
+  car,
+  startAt,
+  endAt,
+  totalPrice,
+  customerName,
+  customerPhone,
+  customerIc,
+  customerAddress,
+  customerPostcode,
+  customerCity,
+  customerState,
+  bookingId,
+}) {
   const resumeLink = `${env.frontendUrl}/?booking=${bookingId}`;
 
   const message = [
@@ -28,6 +41,8 @@ function buildWhatsappLink({ car, startAt, endAt, totalPrice, customerName, cust
     `Total: RM${totalPrice}`,
     `Name: ${customerName}`,
     `Phone: ${customerPhone}`,
+    `IC: ${customerIc}`,
+    `Address: ${customerAddress}, ${customerPostcode} ${customerCity}, ${customerState}`,
     '',
     'Please arrange payment with us here, then confirm on the website:',
     resumeLink,

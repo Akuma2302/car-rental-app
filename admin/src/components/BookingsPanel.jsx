@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { fetchAdminBookings, cancelBooking, uploadBookingReceipt } from '../services/bookingService.js';
 import { formatDateTime } from '../utils/date.js';
 import BookingsFilters, { DEFAULT_BOOKING_FILTERS, getDurationBand } from './BookingsFilters.jsx';
+import { CalendarIcon, CheckCircleIcon, ClockIcon, CarIcon } from './icons.jsx';
 
 const STATUS_LABELS = { pending: 'Pending', booked: 'Booked', cancelled: 'Cancelled' };
 
@@ -129,15 +130,56 @@ function BookingsPanel() {
     .filter((b) => b.status === 'booked')
     .reduce((sum, b) => sum + b.totalPrice, 0);
 
+  // Non-cancelled bookings whose pick-up is still ahead of now.
+  const upcomingCount = filtered.filter((b) => b.status !== 'cancelled' && new Date(b.startAt) > new Date()).length;
+
+  // Distinct cars with at least one non-cancelled booking in the current view.
+  const carsBookedCount = new Set(filtered.filter((b) => b.status !== 'cancelled').map((b) => b.carId)).size;
+
   return (
-    <div className="panel">
-      <BookingsFilters
-        filters={filters}
-        onChange={setFilters}
-        cars={cars}
-        resultCount={filtered.length}
-        confirmedRevenue={confirmedRevenue}
-      />
+    <div className="bookings-page">
+      <div className="panel">
+        <BookingsFilters filters={filters} onChange={setFilters} cars={cars} />
+      </div>
+
+      <div className="kpi-strip">
+        <div className="kpi-strip-item">
+          <span className="kpi-icon kpi-icon-ink">
+            <CalendarIcon />
+          </span>
+          <div>
+            <div className="kpi-value">{filtered.length}</div>
+            <div className="kpi-label">Total bookings</div>
+          </div>
+        </div>
+        <div className="kpi-strip-item">
+          <span className="kpi-icon kpi-icon-jade">
+            <CheckCircleIcon />
+          </span>
+          <div>
+            <div className="kpi-value">RM{confirmedRevenue}</div>
+            <div className="kpi-label">Confirmed revenue</div>
+          </div>
+        </div>
+        <div className="kpi-strip-item">
+          <span className="kpi-icon kpi-icon-amber">
+            <ClockIcon />
+          </span>
+          <div>
+            <div className="kpi-value">{upcomingCount}</div>
+            <div className="kpi-label">Upcoming bookings</div>
+          </div>
+        </div>
+        <div className="kpi-strip-item">
+          <span className="kpi-icon kpi-icon-ink">
+            <CarIcon />
+          </span>
+          <div>
+            <div className="kpi-value">{carsBookedCount}</div>
+            <div className="kpi-label">Cars booked</div>
+          </div>
+        </div>
+      </div>
 
       {actionError && <p className="form-error">{actionError}</p>}
 
@@ -151,70 +193,72 @@ function BookingsPanel() {
       )}
 
       {!loading && !error && filtered.length > 0 && (
-        <div className="table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Status</th>
-                <th>Car</th>
-                <th>Pick-up</th>
-                <th>Return</th>
-                <th>Duration</th>
-                <th>Total</th>
-                <th>Customer</th>
-                <th>Phone</th>
-                <th>Receipt</th>
-                <th>Booked on</th>
-                <th aria-label="Actions" />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((b) => (
-                <tr key={b.id}>
-                  <td>
-                    <span className={`status-badge status-${b.status}`}>{STATUS_LABELS[b.status]}</span>
-                  </td>
-                  <td>{b.carName}</td>
-                  <td>{formatDateTime(b.startAt)}</td>
-                  <td>{formatDateTime(b.endAt)}</td>
-                  <td className="table-muted">{durationLabel(b.startAt, b.endAt)}</td>
-                  <td>RM{b.totalPrice}</td>
-                  <td>{b.customerName}</td>
-                  <td>
-                    <a href={`tel:${b.customerPhone}`}>{b.customerPhone}</a>
-                  </td>
-                  <td>
-                    {b.receiptUrl ? (
-                      <a href={b.receiptUrl} target="_blank" rel="noreferrer">
-                        View
-                      </a>
-                    ) : b.status === 'pending' ? (
-                      <label className="btn btn-outline btn-sm">
-                        {uploadingId === b.id ? 'Uploading…' : 'Upload receipt'}
-                        <input
-                          type="file"
-                          accept="image/jpeg,image/png,image/webp"
-                          style={{ display: 'none' }}
-                          disabled={uploadingId === b.id}
-                          onChange={(e) => handleUploadReceipt(b, e.target.files?.[0])}
-                        />
-                      </label>
-                    ) : (
-                      <span className="table-muted">—</span>
-                    )}
-                  </td>
-                  <td className="table-muted">{formatDateTime(b.createdAt)}</td>
-                  <td>
-                    {b.status !== 'cancelled' && (
-                      <button className="btn btn-outline btn-sm btn-danger" onClick={() => handleCancel(b)}>
-                        Cancel
-                      </button>
-                    )}
-                  </td>
+        <div className="panel">
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>Car</th>
+                  <th>Pick-up</th>
+                  <th>Return</th>
+                  <th>Duration</th>
+                  <th>Total</th>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Receipt</th>
+                  <th>Booked on</th>
+                  <th aria-label="Actions" />
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map((b) => (
+                  <tr key={b.id}>
+                    <td>
+                      <span className={`status-badge status-${b.status}`}>{STATUS_LABELS[b.status]}</span>
+                    </td>
+                    <td>{b.carName}</td>
+                    <td>{formatDateTime(b.startAt)}</td>
+                    <td>{formatDateTime(b.endAt)}</td>
+                    <td className="table-muted">{durationLabel(b.startAt, b.endAt)}</td>
+                    <td>RM{b.totalPrice}</td>
+                    <td>{b.customerName}</td>
+                    <td>
+                      <a href={`tel:${b.customerPhone}`}>{b.customerPhone}</a>
+                    </td>
+                    <td>
+                      {b.receiptUrl ? (
+                        <a href={b.receiptUrl} target="_blank" rel="noreferrer">
+                          View
+                        </a>
+                      ) : b.status === 'pending' ? (
+                        <label className="btn btn-outline btn-sm">
+                          {uploadingId === b.id ? 'Uploading…' : 'Upload receipt'}
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            style={{ display: 'none' }}
+                            disabled={uploadingId === b.id}
+                            onChange={(e) => handleUploadReceipt(b, e.target.files?.[0])}
+                          />
+                        </label>
+                      ) : (
+                        <span className="table-muted">—</span>
+                      )}
+                    </td>
+                    <td className="table-muted">{formatDateTime(b.createdAt)}</td>
+                    <td>
+                      {b.status !== 'cancelled' && (
+                        <button className="btn btn-outline btn-sm btn-danger" onClick={() => handleCancel(b)}>
+                          Cancel
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

@@ -47,6 +47,8 @@ const telegramService = {
       '',
       `Car: ${booking.carName}`,
       `Customer: ${booking.customerName} (${booking.customerPhone})`,
+      `IC: ${booking.customerIc}`,
+      `Address: ${booking.customerAddress}, ${booking.customerPostcode} ${booking.customerCity}, ${booking.customerState}`,
       `Pick-up: ${formatDateTime(booking.startAt)}`,
       `Return: ${formatDateTime(booking.endAt)}`,
       `Total: RM${booking.totalPrice}`,

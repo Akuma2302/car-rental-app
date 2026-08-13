@@ -14,6 +14,11 @@ function toBookingDto(row) {
     cancelledAt: row.cancelled_at,
     customerName: row.customer_name,
     customerPhone: row.customer_phone,
+    customerIc: row.customer_ic,
+    customerAddress: row.customer_address,
+    customerPostcode: row.customer_postcode,
+    customerCity: row.customer_city,
+    customerState: row.customer_state,
     createdAt: row.created_at,
     agentNotifiedAt: row.agent_notified_at,
     agentDecision: row.agent_decision,
@@ -73,13 +78,41 @@ const bookingRepository = {
    * conflicts; the service layer translates that into a 409. Always
    * created "pending" — see confirmPayment below.
    */
-  async create({ carId, startAt, endAt, totalPrice, customerName, customerPhone }) {
+  async create({
+    carId,
+    startAt,
+    endAt,
+    totalPrice,
+    customerName,
+    customerPhone,
+    customerIc,
+    customerAddress,
+    customerPostcode,
+    customerCity,
+    customerState,
+  }) {
     const id = crypto.randomUUID();
     const { rows } = await pool.query(
-      `INSERT INTO bookings (id, car_id, start_at, end_at, total_price, customer_name, customer_phone, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending')
+      `INSERT INTO bookings (
+         id, car_id, start_at, end_at, total_price, customer_name, customer_phone,
+         customer_ic, customer_address, customer_postcode, customer_city, customer_state, status
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'pending')
        RETURNING *`,
-      [id, carId, startAt, endAt, totalPrice, customerName, customerPhone]
+      [
+        id,
+        carId,
+        startAt,
+        endAt,
+        totalPrice,
+        customerName,
+        customerPhone,
+        customerIc,
+        customerAddress,
+        customerPostcode,
+        customerCity,
+        customerState,
+      ]
     );
     return toBookingDto(rows[0]);
   },

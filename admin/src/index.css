@@ -181,68 +181,190 @@ code {
 }
 
 /* ===================== DASHBOARD SHELL ===================== */
-.dashboard {
+.admin-shell {
   min-height: 100vh;
+  display: flex;
 }
-.dash-header {
+
+.admin-sidebar {
+  width: 240px;
+  flex-shrink: 0;
   background: var(--ink);
   color: #fff;
-  padding: 18px 28px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
+  flex-direction: column;
+  padding: 22px 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
 }
-.dash-title {
-  font-weight: 800;
-  font-size: 1.1rem;
+.admin-sidebar-logo {
   display: flex;
   align-items: center;
   gap: 9px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  padding: 4px 10px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 14px;
 }
-.dash-user {
+.admin-sidebar-logo-tag {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 700;
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.admin-nav-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  font-size: 0.86rem;
-  color: rgba(255, 255, 255, 0.75);
-}
-.dash-user .btn-outline {
-  border-color: rgba(255, 255, 255, 0.25);
-  color: #fff;
-}
-.dash-user .btn-outline:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-.dash-tabs {
-  display: flex;
-  gap: 6px;
-  padding: 18px 28px 0;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-.dash-tab {
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: var(--radius-sm);
   background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
-  padding: 10px 4px;
-  margin-right: 22px;
-  font-weight: 700;
-  font-size: 0.92rem;
-  color: var(--ink-soft);
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: left;
 }
-.dash-tab.active {
+.admin-nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+.admin-nav-item.active {
+  background: var(--amber);
   color: var(--ink);
-  border-bottom-color: var(--amber);
 }
 
-.dash-content {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 8px 28px 60px;
+.admin-sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.admin-user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 4px;
+}
+.admin-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--amber);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.admin-user-name {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #fff;
+}
+.admin-user-role {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+.admin-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+.admin-logout-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.admin-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.admin-topbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  padding: 24px 32px;
+}
+.admin-topbar h1 {
+  font-size: 1.5rem;
+}
+.admin-topbar p {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 24px 32px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (max-width: 860px) {
+  .admin-shell {
+    flex-direction: column;
+  }
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 16px;
+  }
+  .admin-sidebar-logo {
+    border-bottom: none;
+    padding: 0;
+    margin-bottom: 0;
+  }
+  .admin-nav {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+  .admin-nav-item {
+    white-space: nowrap;
+  }
+  .admin-sidebar-footer {
+    margin-top: 0;
+    margin-left: auto;
+    border-top: none;
+    flex-direction: row;
+    align-items: center;
+  }
+  .admin-user-chip {
+    display: none;
+  }
+  .admin-topbar,
+  .admin-content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }
 
 /* ===================== PANELS + TABLE ===================== */
@@ -437,12 +559,6 @@ code {
 }
 
 @media (max-width: 640px) {
-  .dash-header,
-  .dash-tabs,
-  .dash-content {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
   .panel {
     padding: 16px;
   }
@@ -584,6 +700,83 @@ code {
   flex-direction: column;
   gap: 22px;
 }
+
+.bookings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.kpi-strip {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.kpi-strip-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 28px;
+  border-right: 1px solid var(--line);
+}
+.kpi-strip-item:first-child {
+  padding-left: 0;
+}
+.kpi-strip-item:last-child {
+  border-right: none;
+}
+.kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.kpi-icon-ink {
+  background: rgba(15, 27, 46, 0.08);
+  color: var(--ink);
+}
+.kpi-icon-jade {
+  background: var(--jade-light);
+  color: var(--jade);
+}
+.kpi-icon-amber {
+  background: rgba(245, 166, 35, 0.15);
+  color: var(--amber-dark);
+}
+.kpi-value {
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.15;
+}
+.kpi-label {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+@media (max-width: 700px) {
+  .kpi-strip {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .kpi-strip-item {
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    padding: 14px 0;
+    width: 100%;
+  }
+  .kpi-strip-item:last-child {
+    border-bottom: none;
+  }
+}
+
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));

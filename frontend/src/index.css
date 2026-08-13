@@ -252,8 +252,10 @@ h3 {
 }
 
 .nav {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 40;
   padding: 18px 28px 0;
   pointer-events: none;
@@ -1220,6 +1222,11 @@ h3 {
   flex-direction: column;
   gap: 20px;
 }
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 .field label {
   display: block;
   font-size: 0.78rem;
@@ -1231,7 +1238,8 @@ h3 {
 }
 .field input[type='date'],
 .field input[type='text'],
-.field input[type='tel'] {
+.field input[type='tel'],
+.field select {
   width: 100%;
   padding: 12px 14px;
   border-radius: var(--radius-sm);
@@ -1239,9 +1247,34 @@ h3 {
   font: inherit;
   font-size: 0.95rem;
   background: #fff;
+  color: var(--ink);
 }
-.field input:focus {
+.field input:focus,
+.field select:focus {
   border-color: var(--amber);
+  outline: none;
+}
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 480px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+}
+.form-back-link {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.form-back-link:hover {
+  color: var(--amber-dark);
 }
 
 .datetime-field label {
@@ -1317,22 +1350,6 @@ h3 {
   font-size: 0.78rem;
   color: var(--ink-soft);
   text-align: center;
-}
-
-.existing-pending-prompt {
-  background: rgba(245, 166, 35, 0.14);
-  border: 1px solid rgba(245, 166, 35, 0.35);
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  text-align: center;
-}
-.existing-pending-prompt p {
-  font-size: 0.86rem;
-  color: var(--ink);
-  font-weight: 600;
 }
 
 .success-state {

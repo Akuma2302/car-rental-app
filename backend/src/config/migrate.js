@@ -163,6 +163,15 @@ ALTER TABLE bookings ADD COLUMN IF NOT EXISTS agent_notified_at TIMESTAMPTZ;
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS agent_decision TEXT;
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS telegram_message_id TEXT;
 
+-- Personal/delivery details collected in step 2 of the booking form —
+-- needed for the rental agreement and to reach the customer if something
+-- comes up beyond the phone number already collected in step 1.
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS customer_ic TEXT;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS customer_address TEXT;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS customer_postcode TEXT;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS customer_city TEXT;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS customer_state TEXT;
+
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'bookings_agent_decision_check') THEN

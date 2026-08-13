@@ -11,6 +11,11 @@ function validateBookingPayload(body) {
   }
   if (!body.customerName || !body.customerName.trim()) errors.push('customerName is required');
   if (!body.customerPhone || !body.customerPhone.trim()) errors.push('customerPhone is required');
+  if (!body.customerIc || !body.customerIc.trim()) errors.push('customerIc is required');
+  if (!body.customerAddress || !body.customerAddress.trim()) errors.push('customerAddress is required');
+  if (!body.customerPostcode || !body.customerPostcode.trim()) errors.push('customerPostcode is required');
+  if (!body.customerCity || !body.customerCity.trim()) errors.push('customerCity is required');
+  if (!body.customerState || !body.customerState.trim()) errors.push('customerState is required');
 
   return errors;
 }
