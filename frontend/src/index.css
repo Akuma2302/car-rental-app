@@ -1294,7 +1294,7 @@ h3 {
 .datetime-inputs {
   display: grid;
   grid-template-columns: 1.3fr 1fr;
-  gap: 14px;
+  gap: 20px;
 }
 .datetime-inputs input,
 .datetime-inputs select {
