@@ -419,6 +419,11 @@ h3 {
   padding: 0 28px;
   padding-bottom: 56px;
 }
+@media (max-width: 760px) {
+  .hero-inner {
+    padding-top: 110px;
+  }
+}
 @media (min-width: 1024px) {
   .hero-inner {
     display: grid;
@@ -1289,7 +1294,7 @@ h3 {
 .datetime-inputs {
   display: grid;
   grid-template-columns: 1.3fr 1fr;
-  gap: 8px;
+  gap: 14px;
 }
 .datetime-inputs input,
 .datetime-inputs select {

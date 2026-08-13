@@ -30,8 +30,6 @@ function buildWhatsappLink({
   customerState,
   bookingId,
 }) {
-  const resumeLink = `${env.frontendUrl}/?booking=${bookingId}`;
-
   const message = [
     `New Booking Request - ${env.businessName}`,
     `Status: PENDING (payment not yet confirmed)`,
@@ -45,10 +43,6 @@ function buildWhatsappLink({
     `Address: ${customerAddress}, ${customerPostcode} ${customerCity}, ${customerState}`,
     '',
     "We'll connect with you shortly to confirm — stay tuned!",
-    '',
-    `View or cancel this booking anytime: ${resumeLink}`,
-    '',
-    '(Sent via website booking form)',
   ].join('\n');
 
   return `https://wa.me/${env.whatsappNumber}?text=${encodeURIComponent(message)}`;
