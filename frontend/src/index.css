@@ -1293,7 +1293,7 @@ h3 {
 }
 .datetime-inputs {
   display: grid;
-  grid-template-columns: 1.3fr 1fr;
+  grid-template-columns: 1.3fr 0.85fr 0.85fr;
   gap: 20px;
 }
 .datetime-inputs input,
@@ -1310,6 +1310,16 @@ h3 {
 .datetime-inputs select:focus {
   border-color: var(--amber);
   outline: none;
+}
+@media (max-width: 480px) {
+  .datetime-inputs {
+    gap: 2px;
+  }
+  .datetime-inputs input,
+  .datetime-inputs select {
+    padding: 10px 6px;
+    font-size: 0.85rem;
+  }
 }
 
 .booked-ranges-details {
