@@ -72,7 +72,7 @@ const agentService = {
       await telegramService.editMessage(
         chatId,
         messageId,
-        `✅ Confirmed for ${booking.customerName} — now upload the receipt in the admin dashboard to finish.`
+        `✅ Confirmed for ${booking.customerName} — send the receipt photo here in this chat and it'll be uploaded automatically.`
       );
       return;
     }
@@ -86,6 +86,48 @@ const agentService = {
     }
 
     await telegramService.answerCallback(callbackQueryId, 'Unrecognized action.');
+  },
+
+  /**
+   * Handles a photo the admin sends in the chat after tapping Confirm —
+   * downloads it from Telegram and runs it through the exact same
+   * receipt-upload pipeline as the admin dashboard's file input
+   * (bookingService.confirmPayment), so it ends up in the same storage
+   * bucket and flips the booking to 'booked' the same way either path
+   * would.
+   *
+   * Matching to a booking: if the photo was sent as a reply to a specific
+   * alert message, that booking is used directly (telegram_message_id).
+   * Otherwise, falls back to the most recently Confirmed-but-unpaid
+   * booking — correct in the common case of one booking in flight at a
+   * time; sending as a reply is the reliable way to disambiguate if
+   * several are pending receipts at once.
+   */
+  async handleReceiptPhoto({ chatId, fileId, replyToMessageId }) {
+    const booking = replyToMessageId
+      ? await bookingRepository.findByTelegramMessageId(replyToMessageId)
+      : await bookingRepository.findMostRecentAwaitingReceipt();
+
+    if (!booking) {
+      await telegramService.sendMessage(
+        chatId,
+        "Couldn't find a booking waiting on a receipt — tap *Confirmed* on a booking's alert first, or upload it from the admin dashboard instead."
+      );
+      return;
+    }
+
+    try {
+      const buffer = await telegramService.downloadPhoto(fileId);
+      const file = { buffer, mimetype: 'image/jpeg', originalname: `telegram-${fileId}.jpg` };
+      await bookingService.confirmPayment(booking.id, file);
+      await telegramService.sendMessage(
+        chatId,
+        `📎 Receipt received and uploaded — booking for ${booking.customerName} is now *confirmed*.`
+      );
+    } catch (err) {
+      console.error(`Failed to process Telegram receipt photo for booking ${booking.id}:`, err.message);
+      await telegramService.sendMessage(chatId, `Couldn't upload that receipt: ${err.message}`);
+    }
   },
 };
 

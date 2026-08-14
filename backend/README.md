@@ -272,9 +272,21 @@ assuming a fresh install. This runs automatically on every server start.
 
 As soon as a booking is created, the admin gets pinged on Telegram with
 **Confirm** / **Cancel** buttons — no need to wait for it to go stale.
-Tapping Confirm just leaves a note that the receipt still needs uploading
-in the dashboard; tapping Cancel cancels the booking immediately and frees
-the car's time range.
+Tapping Cancel cancels the booking immediately and frees the car's time
+range. Tapping Confirm marks it confirmed and prompts for the receipt —
+**send the receipt photo right there in the chat** and it uploads
+automatically through the same pipeline the admin dashboard's file input
+uses (same storage bucket, same validation), flipping the booking to
+`booked` without ever touching the dashboard. Uploading from the
+dashboard instead still works exactly as before, too — either path is
+fine.
+
+If a photo is sent as a reply to a specific booking's alert message,
+that's the one it uploads to. Sent without replying, it goes to whichever
+booking was most recently marked Confirmed and is still waiting on a
+receipt — fine for one booking in flight at a time, but reply directly if
+you've confirmed more than one and haven't uploaded receipts for all of
+them yet.
 
 The scheduled sweep (`POST /api/agent/sweep`, still described below) acts
 as a fallback: if the immediate notification ever fails (e.g. a transient
@@ -312,12 +324,19 @@ is notified immediately on creation.
    Header: X-Agent-Secret: <your AGENT_SWEEP_SECRET>
    ```
 
+**If `TELEGRAM_ADMIN_CHAT_ID` is a group, not a private chat:** Telegram's
+default "privacy mode" stops a bot from seeing plain messages (including
+photos) sent in a group unless they're a command aimed at it — which
+would break the receipt-photo upload. Message `@BotFather` → `/mybots` →
+select your bot → Bot Settings → Group Privacy → **Turn off**. Not needed
+for a private 1:1 chat with the bot.
+
 **Endpoints involved:**
 
 | Method | Path | Purpose |
 |---|---|---|
 | POST | `/api/agent/sweep` | Triggers a sweep for stale-pending bookings (needs `X-Agent-Secret` header) |
-| POST | `/api/telegram/webhook` | Receives button taps from Telegram (needs a valid `secret_token`, set automatically by the registration script) |
+| POST | `/api/telegram/webhook` | Receives button taps and receipt photos from Telegram (needs a valid `secret_token`, set automatically by the registration script) |
 
 A booking is only ever notified once (`agent_notified_at` guards this), and
 a tap is only ever actioned once (`agent_decision` guards this) — retries

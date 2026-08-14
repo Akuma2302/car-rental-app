@@ -178,6 +178,31 @@ const bookingRepository = {
     ]);
     return rows[0] ? toBookingDto(rows[0]) : null;
   },
+
+  /** Finds the booking a Telegram alert message belongs to, so a photo
+   * sent as a reply to that message can be matched to the right booking. */
+  async findByTelegramMessageId(telegramMessageId) {
+    const { rows } = await pool.query(`SELECT * FROM bookings WHERE telegram_message_id = $1`, [
+      String(telegramMessageId),
+    ]);
+    return rows[0] ? toBookingDto(rows[0]) : null;
+  },
+
+  /**
+   * Fallback for a receipt photo sent without replying to a specific
+   * alert: the admin tapped Confirm but hasn't uploaded a receipt yet, so
+   * this is almost always exactly what a bare photo is for. Picks the
+   * most recently confirmed one if more than one is waiting.
+   */
+  async findMostRecentAwaitingReceipt() {
+    const { rows } = await pool.query(
+      `SELECT * FROM bookings
+       WHERE status = 'pending' AND agent_decision = 'confirmed' AND receipt_url IS NULL
+       ORDER BY agent_notified_at DESC NULLS LAST, created_at DESC
+       LIMIT 1`
+    );
+    return rows[0] ? toBookingDto(rows[0]) : null;
+  },
 };
 
 module.exports = bookingRepository;

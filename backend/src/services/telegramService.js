@@ -107,6 +107,35 @@ const telegramService = {
       show_alert: false,
     });
   },
+
+  /** Plain follow-up message (not editing an existing one) — used for the
+   * "send the receipt photo now" prompt and the upload result. */
+  async sendMessage(chatId, text, extra = {}) {
+    return callTelegram('sendMessage', {
+      chat_id: chatId,
+      text,
+      parse_mode: 'Markdown',
+      ...extra,
+    });
+  },
+
+  /**
+   * Downloads a photo the admin sent in Telegram, for forwarding straight
+   * into the same receipt-upload pipeline the admin dashboard's file input
+   * uses. Telegram sends photos as several resolutions (photo[]); the
+   * caller passes the highest-res file_id.
+   */
+  async downloadPhoto(fileId) {
+    const fileInfo = await callTelegram('getFile', { file_id: fileId });
+    const res = await fetch(`${TELEGRAM_API}/file/bot${env.telegramBotToken}/${fileInfo.file_path}`);
+    if (!res.ok) {
+      const err = new Error(`Failed to download photo from Telegram (${res.status})`);
+      err.status = 502;
+      throw err;
+    }
+    const arrayBuffer = await res.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  },
 };
 
 module.exports = telegramService;
