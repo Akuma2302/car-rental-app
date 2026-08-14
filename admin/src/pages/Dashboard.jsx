@@ -4,7 +4,7 @@ import { businessName } from '../utils/siteConfig.js';
 import DashboardPanel from '../components/DashboardPanel.jsx';
 import BookingsPanel from '../components/BookingsPanel.jsx';
 import CarsPanel from '../components/CarsPanel.jsx';
-import { GridIcon, CalendarIcon, CarIcon, LogoutIcon } from '../components/icons.jsx';
+import { GridIcon, CalendarIcon, CarIcon, LogoutIcon, MenuIcon, CloseIcon } from '../components/icons.jsx';
 
 const TABS = [
   { key: 'dashboard', icon: GridIcon, label: 'Dashboard', subtitle: 'Overview of your fleet and bookings' },
@@ -15,15 +15,32 @@ const TABS = [
 function Dashboard() {
   const { username, logout } = useAuth();
   const [tab, setTab] = useState('dashboard');
+  const [menuOpen, setMenuOpen] = useState(false);
   const active = TABS.find((t) => t.key === tab);
+
+  function selectTab(key) {
+    setTab(key);
+    setMenuOpen(false);
+  }
 
   return (
     <div className="admin-shell">
-      <aside className="admin-sidebar">
-        <div className="admin-sidebar-logo">
-          <span className="logo-dot" />
-          {businessName}
-          <span className="admin-sidebar-logo-tag">ADMIN</span>
+      <aside className={`admin-sidebar${menuOpen ? ' menu-open' : ''}`}>
+        <div className="admin-sidebar-top">
+          <div className="admin-sidebar-logo">
+            <span className="logo-dot" />
+            {businessName}
+            <span className="admin-sidebar-logo-tag">ADMIN</span>
+          </div>
+          <button
+            type="button"
+            className="admin-menu-toggle"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-expanded={menuOpen}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? <CloseIcon width={18} height={18} /> : <MenuIcon width={18} height={18} />}
+          </button>
         </div>
 
         <nav className="admin-nav">
@@ -32,7 +49,7 @@ function Dashboard() {
               key={t.key}
               type="button"
               className={`admin-nav-item${tab === t.key ? ' active' : ''}`}
-              onClick={() => setTab(t.key)}
+              onClick={() => selectTab(t.key)}
             >
               <t.icon />
               {t.label}

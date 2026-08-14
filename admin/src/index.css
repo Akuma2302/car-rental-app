@@ -198,23 +198,40 @@ code {
   top: 0;
   height: 100vh;
 }
+.admin-sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 14px;
+}
 .admin-sidebar-logo {
   display: flex;
   align-items: center;
   gap: 9px;
   font-weight: 800;
   font-size: 1.05rem;
-  padding: 4px 10px 22px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  margin-bottom: 14px;
 }
 .admin-sidebar-logo-tag {
-  margin-left: auto;
+  margin-left: 8px;
   font-family: var(--font-mono);
   font-size: 0.62rem;
   letter-spacing: 0.08em;
   color: rgba(255, 255, 255, 0.45);
   font-weight: 700;
+}
+.admin-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: #fff;
+  flex-shrink: 0;
 }
 
 .admin-nav {
@@ -332,33 +349,36 @@ code {
   .admin-sidebar {
     width: 100%;
     height: auto;
-    position: static;
-    flex-direction: row;
-    align-items: center;
-    padding: 12px 16px;
-    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    padding: 14px 16px;
   }
-  .admin-sidebar-logo {
+  .admin-sidebar-top {
     border-bottom: none;
-    padding: 0;
+    padding-bottom: 0;
     margin-bottom: 0;
   }
-  .admin-nav {
-    flex-direction: row;
-    overflow-x: auto;
+  .admin-menu-toggle {
+    display: flex;
   }
-  .admin-nav-item {
-    white-space: nowrap;
+  /* Collapsed by default — only the top row (logo + toggle) shows until
+     tapped. This replaces a horizontal-scrolling nav row that only ever
+     showed one tab at a time with no visible scroll affordance. */
+  .admin-nav {
+    display: none;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
   }
   .admin-sidebar-footer {
-    margin-top: 0;
-    margin-left: auto;
-    border-top: none;
-    flex-direction: row;
-    align-items: center;
-  }
-  .admin-user-chip {
     display: none;
+    margin-top: 14px;
+    padding-top: 14px;
+  }
+  .admin-sidebar.menu-open .admin-nav,
+  .admin-sidebar.menu-open .admin-sidebar-footer {
+    display: flex;
   }
   .admin-topbar,
   .admin-content {
