@@ -1313,7 +1313,7 @@ h3 {
 }
 @media (max-width: 480px) {
   .datetime-inputs {
-    gap: 2px;
+    gap: 14px;
   }
   .datetime-inputs input,
   .datetime-inputs select {
