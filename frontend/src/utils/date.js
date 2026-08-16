@@ -27,6 +27,7 @@ export function combineDateTime(dateStr, timeStr) {
 
 export function formatRangeShort(iso) {
   return new Date(iso).toLocaleString('en-GB', {
+    timeZone: 'Asia/Kuala_Lumpur',
     day: 'numeric',
     month: 'short',
     hour: '2-digit',

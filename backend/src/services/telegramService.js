@@ -4,6 +4,7 @@ const TELEGRAM_API = 'https://api.telegram.org';
 
 function formatDateTime(iso) {
   return new Date(iso).toLocaleString('en-GB', {
+    timeZone: 'Asia/Kuala_Lumpur',
     weekday: 'short',
     day: 'numeric',
     month: 'long',

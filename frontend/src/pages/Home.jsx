@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import Header from '../layout/Header.jsx';
 import Footer from '../layout/Footer.jsx';
 import Hero from '../components/Hero.jsx';
+import WhyChooseSection from '../components/WhyChooseSection.jsx';
+import HowItWorksSection from '../components/HowItWorksSection.jsx';
 import CarsSection from '../components/CarsSection.jsx';
 import UspSection from '../components/UspSection.jsx';
 import LocationSection from '../components/LocationSection.jsx';
@@ -42,6 +44,8 @@ function Home() {
       <PendingBookingBanner />
       <Header />
       <Hero />
+      <WhyChooseSection />
+      <HowItWorksSection />
       <CarsSection cars={cars} loading={loading} error={error} />
       <UspSection />
       <LocationSection />

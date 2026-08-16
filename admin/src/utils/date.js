@@ -9,6 +9,7 @@ export function formatNiceDate(dateStr) {
 
 export function formatDateTime(isoStr) {
   return new Date(isoStr).toLocaleString('en-GB', {
+    timeZone: 'Asia/Kuala_Lumpur',
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
