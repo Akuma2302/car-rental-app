@@ -1131,6 +1131,102 @@ h3 {
   color: rgba(255, 255, 255, 0.68);
 }
 
+/* ===================== FAQ ===================== */
+.faq {
+  padding: 88px 0;
+}
+.faq-head {
+  margin-bottom: 32px;
+}
+.faq-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 760px) {
+  .faq-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.faq-item {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 4px 20px;
+}
+.faq-item summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+.faq-chevron {
+  flex-shrink: 0;
+  color: var(--ink-soft);
+  transition: transform 0.2s ease;
+}
+.faq-item[open] .faq-chevron {
+  transform: rotate(180deg);
+}
+.faq-item p {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  padding-bottom: 18px;
+  margin-top: -4px;
+}
+
+/* ===================== CTA BANNER ===================== */
+.cta-banner {
+  padding: 0 28px;
+}
+.cta-banner-inner {
+  background: linear-gradient(120deg, var(--ink) 0%, var(--dusk) 100%);
+  border-radius: var(--radius-lg);
+  padding: 56px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.cta-banner-inner h2 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  margin-bottom: 8px;
+}
+.cta-banner-inner p {
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 22px;
+}
+.cta-banner-art {
+  width: 200px;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+.cta-banner-art svg {
+  width: 100%;
+  height: auto;
+}
+@media (max-width: 760px) {
+  .cta-banner-inner {
+    flex-direction: column;
+    text-align: center;
+    padding: 40px 28px;
+  }
+  .cta-banner-art {
+    width: 140px;
+  }
+}
+
 /* ===================== LOCATION ===================== */
 .location {
   padding: 88px 0;

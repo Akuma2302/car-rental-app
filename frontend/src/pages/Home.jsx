@@ -6,6 +6,8 @@ import WhyChooseSection from '../components/WhyChooseSection.jsx';
 import HowItWorksSection from '../components/HowItWorksSection.jsx';
 import CarsSection from '../components/CarsSection.jsx';
 import UspSection from '../components/UspSection.jsx';
+import FaqSection from '../components/FaqSection.jsx';
+import CtaBanner from '../components/CtaBanner.jsx';
 import LocationSection from '../components/LocationSection.jsx';
 import PendingBookingBanner from '../components/PendingBookingBanner.jsx';
 import BookingModal from '../features/booking/BookingModal.jsx';
@@ -48,6 +50,8 @@ function Home() {
       <HowItWorksSection />
       <CarsSection cars={cars} loading={loading} error={error} />
       <UspSection />
+      <FaqSection />
+      <CtaBanner />
       <LocationSection />
       <Footer />
       <BookingModal cars={cars} />
