@@ -98,6 +98,25 @@ const telegramService = {
     });
   },
 
+  /** Follow-up to tapping Confirm — asks whether the charge needs
+   * adjusting before moving on to the receipt-upload step. */
+  async askPriceChange(chatId, messageId, booking) {
+    return callTelegram('editMessageText', {
+      chat_id: chatId,
+      message_id: messageId,
+      text: `✅ Confirmed for ${booking.customerName} — current total is RM${booking.totalPrice}.\n\nIs there any change to the charge?`,
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: '✏️ Yes, change amount', callback_data: `agent:priceyes:${booking.id}` },
+            { text: '✅ No change', callback_data: `agent:priceno:${booking.id}` },
+          ],
+        ],
+      },
+    });
+  },
+
   /** Clears the loading spinner Telegram shows on the tapped button, with
    * a short toast — this is required by the Bot API within ~a few seconds
    * of every callback_query, regardless of what the tap did. */

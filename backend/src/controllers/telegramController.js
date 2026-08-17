@@ -36,6 +36,18 @@ const handleWebhook = asyncHandler(async (req, res) => {
         fileId: largest.file_id,
         replyToMessageId: message.reply_to_message ? String(message.reply_to_message.message_id) : null,
       });
+      return;
+    }
+
+    if (message && typeof message.text === 'string' && !message.text.startsWith('/')) {
+      // handlePriceReply silently no-ops if this isn't actually a number
+      // or nothing's waiting on one — not every message typed in the chat
+      // is meant as a price update.
+      await agentService.handlePriceReply({
+        chatId: message.chat.id,
+        text: message.text,
+        replyToMessageId: message.reply_to_message ? String(message.reply_to_message.message_id) : null,
+      });
     }
   } catch (err) {
     console.error('Telegram webhook handling failed:', err.message);

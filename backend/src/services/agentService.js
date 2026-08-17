@@ -42,6 +42,12 @@ const agentService = {
    * webhook. Idempotent — a booking that already has an agent_decision (or
    * is no longer 'pending', e.g. the admin acted from the dashboard
    * instead) is treated as already-handled rather than re-actioned.
+   *
+   * Confirm leads into two follow-up taps (priceyes/priceno) rather than
+   * going straight to the receipt prompt — those happen *after*
+   * agent_decision is already set to 'confirmed', so they're deliberately
+   * exempted from the "already handled" guard below; only a genuine
+   * repeat tap of Confirm/Cancel itself should be blocked.
    */
   async handleDecision({ bookingId, action, chatId, messageId, callbackQueryId }) {
     const booking = await bookingRepository.findById(bookingId);
@@ -51,7 +57,9 @@ const agentService = {
       return;
     }
 
-    if (booking.agentDecision) {
+    const isPriceStep = action === 'priceyes' || action === 'priceno';
+
+    if (booking.agentDecision && !isPriceStep) {
       await telegramService.answerCallback(callbackQueryId, 'Already handled.');
       return;
     }
@@ -69,10 +77,26 @@ const agentService = {
     if (action === 'confirm') {
       await bookingRepository.setAgentDecision(bookingId, 'confirmed');
       await telegramService.answerCallback(callbackQueryId, 'Marked as confirmed.');
+      await telegramService.askPriceChange(chatId, messageId, booking);
+      return;
+    }
+
+    if (action === 'priceno') {
+      await telegramService.answerCallback(callbackQueryId, 'No change.');
       await telegramService.editMessage(
         chatId,
         messageId,
-        `✅ Confirmed for ${booking.customerName} — send the receipt photo here in this chat and it'll be uploaded automatically.`
+        `📸 Now send the receipt photo here in this chat for ${booking.customerName}'s booking (RM${booking.totalPrice}) and it'll be uploaded automatically.`
+      );
+      return;
+    }
+
+    if (action === 'priceyes') {
+      await telegramService.answerCallback(callbackQueryId, 'Send the new amount.');
+      await telegramService.editMessage(
+        chatId,
+        messageId,
+        `Reply with the new total amount for ${booking.customerName}'s booking (numbers only, e.g. 150).`
       );
       return;
     }
@@ -86,6 +110,36 @@ const agentService = {
     }
 
     await telegramService.answerCallback(callbackQueryId, 'Unrecognized action.');
+  },
+
+  /**
+   * Handles a plain-text reply after the admin tapped "Yes, change
+   * amount" — expects just a number. Matches to a booking the same way
+   * handleReceiptPhoto does (reply-to first, falling back to the most
+   * recent Confirmed-but-unpaid booking).
+   *
+   * Returns true if the message was consumed as a price reply, false if
+   * it wasn't (not a number, or nothing waiting) — the caller should
+   * silently ignore false rather than treat it as an error, since not
+   * every text message sent in the chat is meant as a price update.
+   */
+  async handlePriceReply({ chatId, text, replyToMessageId }) {
+    const amount = parseFloat(String(text).replace(/[^\d.]/g, ''));
+    if (!Number.isFinite(amount) || amount <= 0) return false;
+
+    const booking = replyToMessageId
+      ? await bookingRepository.findByTelegramMessageId(replyToMessageId)
+      : await bookingRepository.findMostRecentAwaitingReceipt();
+
+    if (!booking) return false;
+
+    const rounded = Math.round(amount);
+    await bookingRepository.updateTotalPrice(booking.id, rounded);
+    await telegramService.sendMessage(
+      chatId,
+      `💰 Total updated to *RM${rounded}* for ${booking.customerName}'s booking.\n\n📸 Now send the receipt photo here in this chat and it'll be uploaded automatically.`
+    );
+    return true;
   },
 
   /**

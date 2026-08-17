@@ -179,6 +179,16 @@ const bookingRepository = {
     return rows[0] ? toBookingDto(rows[0]) : null;
   },
 
+  /** Admin-adjusted total, e.g. from the Telegram "any change to the
+   * charge?" step. total_price is stored as a whole-ringgit INTEGER. */
+  async updateTotalPrice(id, totalPrice) {
+    const { rows } = await pool.query(`UPDATE bookings SET total_price = $2 WHERE id = $1 RETURNING *`, [
+      id,
+      Math.round(totalPrice),
+    ]);
+    return rows[0] ? toBookingDto(rows[0]) : null;
+  },
+
   /** Finds the booking a Telegram alert message belongs to, so a photo
    * sent as a reply to that message can be matched to the right booking. */
   async findByTelegramMessageId(telegramMessageId) {

@@ -273,19 +273,27 @@ assuming a fresh install. This runs automatically on every server start.
 As soon as a booking is created, the admin gets pinged on Telegram with
 **Confirm** / **Cancel** buttons — no need to wait for it to go stale.
 Tapping Cancel cancels the booking immediately and frees the car's time
-range. Tapping Confirm marks it confirmed and prompts for the receipt —
-**send the receipt photo right there in the chat** and it uploads
-automatically through the same pipeline the admin dashboard's file input
-uses (same storage bucket, same validation), flipping the booking to
-`booked` without ever touching the dashboard. Uploading from the
-dashboard instead still works exactly as before, too — either path is
-fine.
+range. Tapping Confirm asks **"Is there any change to the charge?"**:
 
-If a photo is sent as a reply to a specific booking's alert message,
-that's the one it uploads to. Sent without replying, it goes to whichever
-booking was most recently marked Confirmed and is still waiting on a
-receipt — fine for one booking in flight at a time, but reply directly if
-you've confirmed more than one and haven't uploaded receipts for all of
+- **No change** → goes straight to the receipt prompt.
+- **Yes, change amount** → reply with just a number (e.g. `150`) and the
+  booking's `total_price` is updated immediately, before moving on to the
+  receipt prompt. This is a whole-ringgit `INTEGER` column, so the reply
+  is rounded.
+
+Either way, it ends at the same place: **send the receipt photo right
+there in the chat** and it uploads automatically through the same
+pipeline the admin dashboard's file input uses (same storage bucket, same
+validation), flipping the booking to `booked` without ever touching the
+dashboard. Uploading from the dashboard instead still works exactly as
+before, too — either path is fine.
+
+If a photo (or, for the price step, a numeric reply) is sent as a reply
+to a specific booking's alert message, that's the one it applies to. Sent
+without replying, it goes to whichever booking was most recently marked
+Confirmed and is still waiting on a receipt — fine for one booking in
+flight at a time, but reply directly if you've confirmed more than one
+and haven't uploaded receipts for all of
 them yet.
 
 The scheduled sweep (`POST /api/agent/sweep`, still described below) acts
