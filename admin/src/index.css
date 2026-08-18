@@ -1039,6 +1039,52 @@ code {
   font-size: 1.05rem;
   color: var(--ink);
 }
+.attention-list-clickable li {
+  border-bottom: none;
+  padding: 0;
+  display: block;
+}
+.attention-row-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 8px;
+  margin: 0 -8px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
+  color: var(--ink);
+  text-align: left;
+}
+.attention-list-clickable li:last-child .attention-row-btn {
+  border-bottom: none;
+}
+.attention-row-btn:hover {
+  background: var(--stone);
+}
+.fleet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 8px 10px;
+}
+.fleet-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.84rem;
+  color: var(--ink-soft);
+  border-bottom: none;
+}
+.fleet-list-empty {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  padding: 4px 8px 10px;
+}
 .text-jade {
   color: var(--jade) !important;
 }

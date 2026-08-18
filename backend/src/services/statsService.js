@@ -58,14 +58,23 @@ const statsService = {
         c.condition === 'in_service' &&
         !onRoadCarIds.has(c.id) &&
         !reservedCarIds.has(c.id)
-    ).length;
+    );
+    const onRoadCars = cars.filter((c) => onRoadCarIds.has(c.id));
+    const maintenanceCars = cars.filter((c) => maintenanceCarIds.has(c.id));
+
+    // Slim car summaries for the drill-down lists — name/category only,
+    // not the full car record (images etc.) the admin doesn't need here.
+    const toSummary = (c) => ({ id: c.id, name: c.name, category: c.category });
 
     return {
       totalFleet: cars.length,
       onRoad: onRoadCarIds.size,
-      available,
+      available: available.length,
       maintenance: maintenanceCarIds.size,
       reserved: reservedCarIds.size,
+      availableCars: available.map(toSummary),
+      onRoadCars: onRoadCars.map(toSummary),
+      maintenanceCars: maintenanceCars.map(toSummary),
     };
   },
 

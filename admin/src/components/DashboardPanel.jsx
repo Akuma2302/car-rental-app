@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useDashboard } from '../hooks/useDashboard.js';
 import { formatDateTime } from '../utils/date.js';
@@ -11,6 +12,7 @@ function greetingForHour(hour) {
 function DashboardPanel({ onNavigate }) {
   const { token, logout, username } = useAuth();
   const { data, loading, error } = useDashboard(token, logout);
+  const [expandedFleet, setExpandedFleet] = useState(null); // 'available' | 'onRoad' | 'maintenance' | null
 
   if (loading) return <p className="state-message">Loading dashboard…</p>;
   if (error) return <p className="state-message state-error">{error}</p>;
@@ -108,18 +110,45 @@ function DashboardPanel({ onNavigate }) {
 
         <div className="panel">
           <h3 className="panel-heading">🚗 Fleet Status</h3>
-          <ul className="attention-list">
+          <ul className="attention-list attention-list-clickable">
             <li>
-              <span>Available</span>
-              <b className="text-jade">{fleetStatus.available}</b>
+              <button
+                type="button"
+                className="attention-row-btn"
+                onClick={() => setExpandedFleet((prev) => (prev === 'available' ? null : 'available'))}
+              >
+                <span>Available</span>
+                <b className="text-jade">{fleetStatus.available}</b>
+              </button>
+              {expandedFleet === 'available' && (
+                <FleetList cars={fleetStatus.availableCars} emptyLabel="No cars currently available." />
+              )}
             </li>
             <li>
-              <span>Rented</span>
-              <b className="text-amber">{fleetStatus.onRoad}</b>
+              <button
+                type="button"
+                className="attention-row-btn"
+                onClick={() => setExpandedFleet((prev) => (prev === 'onRoad' ? null : 'onRoad'))}
+              >
+                <span>Rented</span>
+                <b className="text-amber">{fleetStatus.onRoad}</b>
+              </button>
+              {expandedFleet === 'onRoad' && (
+                <FleetList cars={fleetStatus.onRoadCars} emptyLabel="No cars currently rented out." />
+              )}
             </li>
             <li>
-              <span>Maintenance</span>
-              <b className="text-coral">{fleetStatus.maintenance}</b>
+              <button
+                type="button"
+                className="attention-row-btn"
+                onClick={() => setExpandedFleet((prev) => (prev === 'maintenance' ? null : 'maintenance'))}
+              >
+                <span>Maintenance</span>
+                <b className="text-coral">{fleetStatus.maintenance}</b>
+              </button>
+              {expandedFleet === 'maintenance' && (
+                <FleetList cars={fleetStatus.maintenanceCars} emptyLabel="No cars currently in maintenance." />
+              )}
             </li>
           </ul>
           <button type="button" className="btn btn-outline btn-sm" onClick={() => onNavigate?.('cars')}>
@@ -299,6 +328,22 @@ function DashboardPanel({ onNavigate }) {
         )}
       </div>
     </div>
+  );
+}
+
+function FleetList({ cars, emptyLabel }) {
+  if (!cars || cars.length === 0) {
+    return <p className="fleet-list-empty">{emptyLabel}</p>;
+  }
+  return (
+    <ul className="fleet-list">
+      {cars.map((c) => (
+        <li key={c.id}>
+          <span>{c.name}</span>
+          {c.category && <span className="badge">{c.category}</span>}
+        </li>
+      ))}
+    </ul>
   );
 }
 
