@@ -38,6 +38,43 @@ const getDashboardOverview = asyncHandler(async (req, res) => {
     .reduce((sum, b) => sum + b.totalPrice, 0);
   const pendingBookings = allBookings.filter((b) => b.status === 'pending');
 
+  // "Requires attention" split: a pending booking is either brand new
+  // (nobody's actioned it yet) or already confirmed-but-unpaid (admin said
+  // yes, still needs a receipt) — those are the only two real states in
+  // between "just booked" and "done", so this is a 2-way split rather than
+  // a 3-way one.
+  const newBookingsCount = pendingBookings.filter((b) => !b.agentDecision).length;
+  const awaitingReceiptCount = pendingBookings.filter((b) => b.agentDecision === 'confirmed' && !b.receiptUrl).length;
+
+  const sevenDaysAhead = now + 7 * 24 * 60 * 60 * 1000;
+  const upcomingBookings = allBookings
+    .filter((b) => b.status !== 'cancelled' && new Date(b.startAt).getTime() >= now && new Date(b.startAt).getTime() <= sevenDaysAhead)
+    .sort((a, b) => new Date(a.startAt) - new Date(b.startAt))
+    .slice(0, 15);
+
+  // Revenue per day for the last 7 days, oldest first — confirmed bookings
+  // only, attributed to the day they were created (not the rental dates).
+  const revenueByDay = [];
+  for (let i = 6; i >= 0; i--) {
+    const dayStart = new Date(now - i * 24 * 60 * 60 * 1000);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+    const revenue = allBookings
+      .filter((b) => b.status === 'booked' && new Date(b.createdAt) >= dayStart && new Date(b.createdAt) < dayEnd)
+      .reduce((sum, b) => sum + b.totalPrice, 0);
+    revenueByDay.push({ date: dayStart.toISOString(), revenue });
+  }
+
+  const bookingStatusBreakdown = {
+    pending: allBookings.filter((b) => b.status === 'pending').length,
+    booked: allBookings.filter((b) => b.status === 'booked').length,
+    cancelled: allBookings.filter((b) => b.status === 'cancelled').length,
+  };
+
+  const recentBookings = [...allBookings]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5);
+
   res.json({
     totalCars: cars.length,
     carsOnRentNow: activeCarIds.size,
@@ -46,6 +83,12 @@ const getDashboardOverview = asyncHandler(async (req, res) => {
     bookingsThisWeek: bookingsThisWeek.length,
     revenueThisWeek,
     pendingPayments: pendingBookings.length,
+    newBookingsCount,
+    awaitingReceiptCount,
+    upcomingBookings,
+    revenueByDay,
+    bookingStatusBreakdown,
+    recentBookings,
     activeRentals: activeNow,
     fleet: cars.map((car) => ({
       id: car.id,

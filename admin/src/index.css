@@ -1004,6 +1004,128 @@ code {
   gap: 22px;
 }
 
+.dash-greeting h2 {
+  font-size: 1.4rem;
+}
+.dash-greeting p {
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+  margin-top: 2px;
+}
+
+.kpi-icon {
+  font-size: 1.3rem;
+}
+
+.attention-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+.attention-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+.attention-list li:last-child {
+  border-bottom: none;
+}
+.attention-list b {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+.text-jade {
+  color: var(--jade) !important;
+}
+.text-amber {
+  color: var(--amber-dark) !important;
+}
+.text-coral {
+  color: var(--coral) !important;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+.status-dot-jade {
+  background: var(--jade);
+}
+.status-dot-amber {
+  background: var(--amber);
+}
+.status-dot-coral {
+  background: var(--coral);
+}
+
+.revenue-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  height: 180px;
+  padding-top: 10px;
+}
+.revenue-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+.revenue-bar-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  max-width: 34px;
+}
+.revenue-bar-fill {
+  width: 100%;
+  background: var(--amber);
+  border-radius: 6px 6px 0 0;
+  min-height: 4px;
+}
+.revenue-bar-value {
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  margin-top: 6px;
+  height: 14px;
+}
+.revenue-bar-label {
+  font-size: 0.76rem;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.status-breakdown-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 100px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  background: var(--stone);
+}
+.status-breakdown-seg {
+  height: 100%;
+}
+.status-breakdown-jade {
+  background: var(--jade);
+}
+.status-breakdown-amber {
+  background: var(--amber);
+}
+.status-breakdown-coral {
+  background: var(--coral);
+}
+
 .bookings-page {
   display: flex;
   flex-direction: column;

@@ -79,7 +79,7 @@ function Dashboard() {
         </header>
 
         <main className="admin-content">
-          {tab === 'dashboard' && <DashboardPanel />}
+          {tab === 'dashboard' && <DashboardPanel onNavigate={setTab} />}
           {tab === 'bookings' && <BookingsPanel />}
           {tab === 'cars' && <CarsPanel />}
         </main>

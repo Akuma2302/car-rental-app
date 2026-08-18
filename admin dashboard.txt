@@ -1,0 +1,44 @@
+┌──────────────────────────────────────────────────────┐
+│ Good Morning, Admin                    🔔  Admin ▼  │
+│ Monday, 17 August 2026                              │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│  🟡 PENDING     🚗 PICKUP     🔄 RETURN     💰 REVENUE│
+│      5              4             2          RM850   │
+│                                                      │
+├──────────────────────────┬───────────────────────────┤
+│ ⚠️ REQUIRES ATTENTION     │ 🚗 FLEET STATUS          │
+│                          │                           │
+│ New Booking       3      │ Available       18       │
+│ Payment Review    2      │ Rented           7       │
+│ Receipt Pending   1      │ Maintenance      2       │
+│                          │                           │
+│ [View All]               │ [Manage Fleet]           │
+├──────────────────────────┴───────────────────────────┤
+│                                                      │
+│ 🚗 TODAY'S PICKUP & RETURN                           │
+│                                                      │
+│ 10:00  Alza   Ahmad     Pickup       Confirmed       │
+│ 12:00  Myvi   Sarah     Pickup       Confirmed       │
+│ 14:00  Axia   Daniel    Return       Ongoing         │
+│                                                      │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│ 📅 UPCOMING BOOKINGS                                 │
+│                                                      │
+│ [Calendar / 7-Day Booking Schedule]                  │
+│                                                      │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│ 💰 REVENUE & BOOKING PERFORMANCE                     │
+│                                                      │
+│ [Revenue Chart]          [Booking Status]            │
+│                                                      │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│ 📋 RECENT BOOKINGS                                   │
+│                                                      │
+│ #1025  Ahmad   Alza   18 Aug   RM450   Pending       │
+│ #1024  Sarah   Myvi   18 Aug   RM300   Confirmed     │
+│                                                      │
+└──────────────────────────────────────────────────────┘
