@@ -38,7 +38,7 @@ function WhyChooseSection() {
   return (
     <section className="why-choose reveal">
       <div className="container">
-        <SectionHeading title="Why Choose JarGo?" center />
+        <SectionHeading title="Why Choose JAGO?" center />
         <div className="why-choose-grid">
           {REASONS.map(({ key, Icon, title, body }) => (
             <div className="why-choose-card" key={key}>

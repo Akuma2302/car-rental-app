@@ -70,7 +70,7 @@ The API starts on **http://localhost:4000** (change with `PORT`).
 | `JWT_SECRET` | Signs admin login sessions | *(required, no default)* |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Bootstraps the first admin account | `admin` / *(required first run)* |
 | `WHATSAPP_NUMBER` | Your WhatsApp number, country code first, digits only | `60172507341` |
-| `BUSINESS_NAME` | Shown in the WhatsApp message | `JarGo` |
+| `BUSINESS_NAME` | Shown in the WhatsApp message | `JAGO` |
 | `OPEN_HOUR` / `CLOSE_HOUR` | Daily operating hours (24h) | `7` / `22` |
 | `CORS_ORIGIN` | Customer frontend's origin | `http://localhost:5173` |
 | `ADMIN_CORS_ORIGIN` | Admin app's origin | `http://localhost:5174` |
@@ -302,6 +302,17 @@ Telegram outage), any booking still `pending` after `AGENT_PENDING_HOURS`
 (default 4) and not yet notified gets picked up and notified there
 instead. In normal operation it should find nothing, since every booking
 is notified immediately on creation.
+
+**On-demand commands** — type these directly in the chat any time, no
+alert needs to be open:
+
+| Command | Replies with |
+|---|---|
+| `/fleetstatus` | Available / Rented / Maintenance counts and car names — same data as the admin dashboard's Fleet Status card |
+| `/today` | Today's pickups and returns — same data as the dashboard's "Today's Pickup & Return" table |
+
+Registered automatically by `registerTelegramWebhook.js` (step 4 below),
+so they'll autocomplete when you type `/` in the chat.
 
 **One-time setup:**
 

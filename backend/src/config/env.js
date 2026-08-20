@@ -7,7 +7,7 @@ require('dotenv').config({ quiet: true });
 const env = {
   port: parseInt(process.env.PORT || '4000', 10),
   whatsappNumber: process.env.WHATSAPP_NUMBER || '60172507341',
-  businessName: process.env.BUSINESS_NAME || 'JarGo',
+  businessName: process.env.BUSINESS_NAME || 'JAGO',
   openHour: parseInt(process.env.OPEN_HOUR || '7', 10),
   closeHour: parseInt(process.env.CLOSE_HOUR || '22', 10),
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',

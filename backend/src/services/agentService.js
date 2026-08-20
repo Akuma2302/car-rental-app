@@ -1,6 +1,7 @@
 const bookingRepository = require('../repositories/bookingRepository');
 const bookingService = require('./bookingService');
 const telegramService = require('./telegramService');
+const statsService = require('./statsService');
 const env = require('../config/env');
 
 const agentService = {
@@ -182,6 +183,65 @@ const agentService = {
       console.error(`Failed to process Telegram receipt photo for booking ${booking.id}:`, err.message);
       await telegramService.sendMessage(chatId, `Couldn't upload that receipt: ${err.message}`);
     }
+  },
+
+  /** Admin types /fleetstatus in the Telegram chat — replies with the
+   * same Available/Rented/Maintenance breakdown (and car lists) shown on
+   * the admin dashboard's Fleet Status card. */
+  async handleFleetStatusCommand(chatId) {
+    const fleet = await statsService.getFleetStatus();
+
+    const section = (emoji, label, cars) => {
+      const lines = [`${emoji} *${label}* (${cars.length})`];
+      if (cars.length === 0) {
+        lines.push('—');
+      } else {
+        for (const c of cars) lines.push(`• ${c.name}`);
+      }
+      return lines.join('\n');
+    };
+
+    const text = [
+      '🚗 *Fleet Status*',
+      '',
+      section('✅', 'Available', fleet.availableCars),
+      '',
+      section('🟠', 'Rented', fleet.onRoadCars),
+      '',
+      section('🔴', 'Maintenance', fleet.maintenanceCars),
+    ].join('\n');
+
+    await telegramService.sendMessage(chatId, text);
+  },
+
+  /** Admin types /today in the Telegram chat — replies with today's
+   * pickups and returns, same data as the admin dashboard's "Today's
+   * Pickup & Return" table. */
+  async handleTodayScheduleCommand(chatId) {
+    const schedule = await statsService.getTodaySchedule();
+    const combined = [
+      ...schedule.pickupsToday.map((b) => ({ ...b, type: 'Pickup', time: b.startAt })),
+      ...schedule.dropoffsToday.map((b) => ({ ...b, type: 'Return', time: b.endAt })),
+    ].sort((a, b) => new Date(a.time) - new Date(b.time));
+
+    if (combined.length === 0) {
+      await telegramService.sendMessage(chatId, "📅 *Today's Pickup & Return*\n\nNothing scheduled today.");
+      return;
+    }
+
+    const lines = combined.map((b) => {
+      const time = new Date(b.time).toLocaleTimeString('en-GB', {
+        timeZone: 'Asia/Kuala_Lumpur',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      const icon = b.type === 'Pickup' ? '🚗' : '🔄';
+      const statusLabel = b.status === 'booked' ? 'Confirmed' : 'Pending';
+      return `${icon} ${time} — ${b.carName}\n   ${b.customerName} · ${b.type} · ${statusLabel}`;
+    });
+
+    const text = ["📅 *Today's Pickup & Return*", '', ...lines].join('\n');
+    await telegramService.sendMessage(chatId, text);
   },
 };
 
