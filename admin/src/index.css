@@ -1,24 +1,24 @@
 :root {
-  --ink: #0f1b2e;
-  --dusk: #16233b;
-  --stone: #f4f6f9;
+  --ink: #111827;
+  --dusk: #163c5b;
+  --stone: #f9fafb;
   --card: #ffffff;
-  --amber: #f5a623;
-  --amber-dark: #dc8f13;
-  --jade: #16a34a;
-  --jade-light: #e7f7ec;
+  --amber: #266ae7;
+  --amber-dark: #1546a0;
+  --jade: #047857;
+  --jade-light: #d1fae5;
   --coral: #ef4444;
-  --coral-light: #fdecec;
-  --ink-soft: rgba(15, 27, 46, 0.62);
-  --line: rgba(15, 27, 46, 0.12);
+  --coral-light: #fef2f2;
+  --ink-soft: rgba(17, 24, 39, 0.64);
+  --line: rgba(17, 24, 39, 0.12);
 
-  --font-body: 'Inter', sans-serif;
-  --font-mono: 'Inter', sans-serif;
+  --font-body: 'Poppins', sans-serif;
+  --font-mono: 'Poppins', sans-serif;
 
   --radius-lg: 16px;
   --radius-md: 12px;
   --radius-sm: 8px;
-  --shadow-card: 0 10px 26px -16px rgba(15, 27, 46, 0.24);
+  --shadow-card: 6px 6px 9px rgba(0, 0, 0, 0.2);
 }
 
 * {
@@ -503,7 +503,7 @@ code {
   font-weight: 700;
 }
 .status-pending {
-  background: rgba(245, 166, 35, 0.18);
+  background: rgba(38, 106, 231, 0.18);
   color: var(--amber-dark);
 }
 .status-booked {
@@ -511,7 +511,7 @@ code {
   color: var(--jade);
 }
 .status-cancelled {
-  background: rgba(15, 27, 46, 0.08);
+  background: rgba(17, 24, 39, 0.08);
   color: var(--ink-soft);
   text-decoration: line-through;
 }
@@ -839,7 +839,7 @@ code {
 /* ===================== CAR FORM ===================== */
 .car-form {
   background: var(--jade-light);
-  border: 1px solid rgba(22, 163, 74, 0.3);
+  border: 1px solid rgba(4, 120, 87, 0.3);
   border-radius: var(--radius-md);
   padding: 20px;
   margin-bottom: 22px;
@@ -990,7 +990,7 @@ code {
   flex-shrink: 0;
 }
 .status-toggle-on {
-  border-color: rgba(22, 163, 74, 0.35);
+  border-color: rgba(4, 120, 87, 0.35);
   color: var(--jade);
 }
 .status-toggle-on .status-toggle-dot {
@@ -1210,7 +1210,7 @@ code {
   flex-shrink: 0;
 }
 .kpi-icon-ink {
-  background: rgba(15, 27, 46, 0.08);
+  background: rgba(17, 24, 39, 0.08);
   color: var(--ink);
 }
 .kpi-icon-jade {
@@ -1218,7 +1218,7 @@ code {
   color: var(--jade);
 }
 .kpi-icon-amber {
-  background: rgba(245, 166, 35, 0.15);
+  background: rgba(38, 106, 231, 0.15);
   color: var(--amber-dark);
 }
 .kpi-value {

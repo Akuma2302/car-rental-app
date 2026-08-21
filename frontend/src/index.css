@@ -1,28 +1,28 @@
 :root {
-  --ink: #0f1b2e;
-  --dusk: #16233b;
-  --stone: #f4f6f9;
+  --ink: #111827;
+  --dusk: #163c5b;
+  --stone: #f9fafb;
   --card: #ffffff;
-  --amber: #f5a623;
-  --amber-dark: #dc8f13;
-  --jade: #16a34a;
-  --jade-light: #e7f7ec;
+  --amber: #266ae7;
+  --amber-dark: #1546a0;
+  --jade: #047857;
+  --jade-light: #d1fae5;
   --coral: #ef4444;
-  --coral-light: #fdecec;
-  --ink-soft: rgba(15, 27, 46, 0.62);
-  --line: rgba(15, 27, 46, 0.12);
+  --coral-light: #fef2f2;
+  --ink-soft: rgba(17, 24, 39, 0.64);
+  --line: rgba(17, 24, 39, 0.12);
   --line-light: rgba(255, 255, 255, 0.14);
 
   --font-display: 'Poppins', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  --font-mono: 'Inter', sans-serif;
+  --font-body: 'Poppins', sans-serif;
+  --font-mono: 'Poppins', sans-serif;
 
   --radius-lg: 16px;
   --radius-md: 12px;
   --radius-sm: 8px;
-  --shadow-card: 0 10px 26px -14px rgba(15, 27, 46, 0.22);
-  --shadow-modal: 0 26px 64px -18px rgba(15, 27, 46, 0.4);
-  --container: 1180px;
+  --shadow-card: 6px 6px 9px rgba(0, 0, 0, 0.2);
+  --shadow-modal: 12px 12px 50px rgba(0, 0, 0, 0.4);
+  --container: 1120px;
 }
 
 * {
@@ -111,7 +111,7 @@ h3 {
 }
 .btn-primary:hover {
   background: var(--amber-dark);
-  box-shadow: 0 10px 24px -10px rgba(245, 166, 35, 0.65);
+  box-shadow: 0 10px 24px -10px rgba(38, 106, 231, 0.65);
 }
 .btn:disabled {
   opacity: 0.45;
@@ -121,7 +121,7 @@ h3 {
 .btn-ghost {
   position: relative;
   overflow: hidden;
-  background: rgba(15, 27, 46, 0.45);
+  background: rgba(17, 24, 39, 0.45);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12);
@@ -208,7 +208,7 @@ h3 {
   height: 26px;
   border-radius: 50%;
   border: none;
-  background: rgba(15, 27, 46, 0.12);
+  background: rgba(17, 24, 39, 0.12);
   color: var(--ink);
   display: flex;
   align-items: center;
@@ -216,14 +216,14 @@ h3 {
   flex-shrink: 0;
 }
 .pending-banner-dismiss:hover {
-  background: rgba(15, 27, 46, 0.22);
+  background: rgba(17, 24, 39, 0.22);
 }
 
 /* ===================== NAV ===================== */
 .liquid-glass {
   position: relative;
   overflow: hidden;
-  background: rgba(15, 27, 46, 0.45);
+  background: rgba(17, 24, 39, 0.45);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12);
@@ -360,7 +360,7 @@ h3 {
     margin: 10px auto 0;
     padding: 8px 20px 14px;
     border-radius: var(--radius-md);
-    background: rgba(15, 27, 46, 0.55);
+    background: rgba(17, 24, 39, 0.55);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     pointer-events: auto;
@@ -521,7 +521,7 @@ h3 {
 
 /* ===================== CARS ===================== */
 .cars {
-  padding: 88px 0 96px;
+  padding: 100px 0 108px;
 }
 .section-head {
   display: flex;
@@ -618,7 +618,7 @@ h3 {
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(15, 27, 46, 0.6);
+    background: rgba(17, 24, 39, 0.6);
     backdrop-filter: blur(3px);
     z-index: 200;
     animation: overlayIn 0.2s ease;
@@ -826,7 +826,7 @@ h3 {
   height: 26px;
   border-radius: 50%;
   border: none;
-  background: rgba(15, 27, 46, 0.55);
+  background: rgba(17, 24, 39, 0.55);
   color: #fff;
   font-size: 1.1rem;
   line-height: 1;
@@ -835,7 +835,7 @@ h3 {
   justify-content: center;
 }
 .carousel-nav:hover {
-  background: rgba(15, 27, 46, 0.8);
+  background: rgba(17, 24, 39, 0.8);
 }
 .carousel-prev {
   left: 8px;
@@ -958,7 +958,7 @@ h3 {
 
 /* ===================== WHY CHOOSE ===================== */
 .why-choose {
-  padding: 88px 0;
+  padding: 100px 0;
 }
 .why-choose-grid {
   display: grid;
@@ -987,7 +987,7 @@ h3 {
   width: 68px;
   height: 68px;
   border-radius: 50%;
-  background: rgba(245, 166, 35, 0.14);
+  background: rgba(38, 106, 231, 0.14);
   color: var(--amber-dark);
   display: flex;
   align-items: center;
@@ -1040,7 +1040,7 @@ h3 {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(245, 166, 35, 0.16);
+  background: rgba(38, 106, 231, 0.16);
   color: var(--amber-dark);
   font-family: var(--font-mono);
   font-weight: 700;
@@ -1082,7 +1082,7 @@ h3 {
 .usp {
   background: var(--ink);
   color: #fff;
-  padding: 88px 0;
+  padding: 100px 0;
 }
 .usp .section-head .eyebrow {
   color: var(--amber);
@@ -1111,12 +1111,12 @@ h3 {
   margin-bottom: 18px;
 }
 .usp-icon-amber {
-  background: rgba(245, 166, 35, 0.16);
+  background: rgba(38, 106, 231, 0.16);
   color: var(--amber);
 }
 .usp-icon-jade {
-  background: rgba(22, 163, 74, 0.22);
-  color: #4ade80;
+  background: rgba(4, 120, 87, 0.22);
+  color: #6ee7b7;
 }
 .usp-icon-coral {
   background: rgba(239, 68, 68, 0.18);
@@ -1133,7 +1133,7 @@ h3 {
 
 /* ===================== FAQ ===================== */
 .faq {
-  padding: 88px 0;
+  padding: 100px 0;
 }
 .faq-head {
   margin-bottom: 32px;
@@ -1229,7 +1229,7 @@ h3 {
 
 /* ===================== LOCATION ===================== */
 .location {
-  padding: 88px 0;
+  padding: 100px 0;
 }
 .location-grid {
   display: grid;
@@ -1399,7 +1399,7 @@ h3 {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 27, 46, 0.6);
+  background: rgba(17, 24, 39, 0.6);
   backdrop-filter: blur(3px);
   display: flex;
   align-items: center;
@@ -1572,7 +1572,7 @@ h3 {
 
 .selection-recap {
   background: var(--jade-light);
-  border: 1px solid rgba(22, 163, 74, 0.3);
+  border: 1px solid rgba(4, 120, 87, 0.3);
   border-radius: var(--radius-sm);
   padding: 12px 14px;
   font-size: 0.86rem;
@@ -1608,11 +1608,11 @@ h3 {
   margin: 0 auto 16px;
 }
 .success-state .check-pending {
-  background: rgba(245, 166, 35, 0.18);
+  background: rgba(38, 106, 231, 0.18);
   color: var(--amber-dark);
 }
 .success-state .check-cancelled {
-  background: rgba(15, 27, 46, 0.08);
+  background: rgba(17, 24, 39, 0.08);
   color: var(--ink-soft);
 }
 .success-state h4 {

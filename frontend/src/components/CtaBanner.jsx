@@ -13,7 +13,7 @@ function CtaBanner() {
           </a>
         </div>
         <div className="cta-banner-art">
-          <CarGlyph tint="#f5a623" />
+          <CarGlyph tint="#266ae7" />
         </div>
       </div>
     </section>
